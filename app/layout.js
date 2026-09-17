@@ -1,6 +1,6 @@
 import Theme from "../components/theme";
 export const metadata = {
-  title: "Tova Solutions — ERP software built around real business functions",
+  title: "Tova ERP — ERP software built around real business functions",
   description:
     "Connected ERP applications for finance, fixed assets, inventory, and workplace operations.",
 };

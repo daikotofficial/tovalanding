@@ -1,7 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 import { cookies } from "next/headers";
 import Pricing from "../components/pricing";
 import MobileMenu from "../components/mobile-menu";
+import SiteFooter from "../components/site-footer";
 const areas = [
   ["Financial Management", "Accounting, valuation, and statutory reports"],
   ["Operational Workflows", "Requests, approvals, and execution tracking"],
@@ -72,7 +74,7 @@ export default async function Home() {
     <>
       <header className="header">
         <Link className="logo" href="/">
-          Tova Solutions
+          <Image src="/tova-erp-logo.png" alt="Tova ERP" width={116} height={58} priority />
         </Link>
         <nav>
           <Link href="#products">Products</Link>
@@ -318,9 +320,9 @@ export default async function Home() {
           <p className="eyebrow">ERP FAQ</p>
           <h2>Questions about the Tova suite</h2>
           <details>
-            <summary>Is Tova Solutions a single application?</summary>
+            <summary>Is Tova ERP a single application?</summary>
             <p>
-              Tova Solutions is a suite. Each product has its own scope,
+              Tova ERP is a suite. Each product has its own scope,
               onboarding, and commercial terms.
             </p>
           </details>
@@ -340,19 +342,7 @@ export default async function Home() {
           </details>
         </section>
       </main>
-      <footer>
-        <Link className="logo" href="/">
-          Tova Solutions
-        </Link>
-        <p>Connected software for real business functions.</p>
-        <div>
-          <Link href="/terms">Terms</Link>
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/cookies">Cookies</Link>
-          <a href="mailto:support@tova.com.ng">support@tova.com.ng</a>
-        </div>
-        <small>© 2026 Tova Solutions · Powered by DAIKOT</small>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

@@ -9,32 +9,32 @@ import { PAYOUT_MINIMUM_MINOR, PAYOUT_PROCESSING_DAYS } from "../../../lib/payou
 export default async function Dashboard() {
   const user = await currentUser();
   if (!user) redirect("/affiliate/login");
-  const referrals = db
+  const referrals = await db
     .prepare(
       "SELECT r.product,r.status,r.created_at,COALESCE(c.amount,0) AS commission FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? ORDER BY r.id DESC LIMIT 50",
     )
     .all(user.id);
-  const totals = db
+  const totals = await db
     .prepare(
       "SELECT COUNT(*) AS registrations, SUM(CASE WHEN status='converted' THEN 1 ELSE 0 END) AS conversions FROM referrals WHERE affiliate_id=?",
     )
     .get(user.id);
-  const earnings = db
+  const earnings = (await db
     .prepare(
       "SELECT COALESCE(SUM(amount),0) AS amount FROM commissions WHERE affiliate_id=? AND status='approved'",
     )
-    .get(user.id).amount;
-  const pending = db
+    .get(user.id)).amount;
+  const pending = (await db
     .prepare(
       "SELECT COALESCE(SUM(amount),0) AS amount FROM payouts WHERE affiliate_id=? AND status IN ('requested','approved')",
     )
-    .get(user.id).amount;
-  const available = db
+    .get(user.id)).amount;
+  const available = (await db
     .prepare(
       "SELECT COALESCE(SUM(c.amount),0) AS amount FROM commissions c WHERE c.affiliate_id=? AND c.status='approved' AND c.id NOT IN (SELECT commission_id FROM payout_commissions)",
     )
-    .get(user.id).amount;
-  const payouts = db
+    .get(user.id)).amount;
+  const payouts = await db
     .prepare("SELECT amount,status,created_at FROM payouts WHERE affiliate_id=? ORDER BY id DESC LIMIT 5")
     .all(user.id);
   const link = process.env.APP_URL + "/r/" + user.code;
@@ -42,7 +42,7 @@ export default async function Dashboard() {
     return (
       <>
         <header className="app-header">
-          <Link className="logo" href="/">Tova Solutions</Link>
+          <Link className="logo" href="/">Tova ERP</Link>
           <AccountActions />
         </header>
         <main className="review-page">
@@ -50,7 +50,7 @@ export default async function Dashboard() {
           <h1>Your application is under review.</h1>
           <p>Thank you for applying, {user.name}. Our team will review your profile before referral access is issued.</p>
           <div className="review-status"><strong>Referral access is not active yet.</strong><span>Links, codes, and commission tracking become available after approval.</span></div>
-          <Link className="button dark" href="/">Return to Tova Solutions</Link>
+          <Link className="button dark" href="/">Return to Tova ERP</Link>
         </main>
       </>
     );
@@ -59,7 +59,7 @@ export default async function Dashboard() {
     <>
       <header className="app-header">
         <Link className="logo" href="/">
-          Tova Solutions
+          Tova ERP
         </Link>
         <nav>
           <Link href="/#products">Products</Link>
@@ -67,7 +67,7 @@ export default async function Dashboard() {
       </header>
       <main className="dashboard-shell">
         <aside className="dashboard-sidebar">
-          <Link className="logo" href="/">Tova Solutions</Link>
+          <Link className="logo" href="/">Tova ERP</Link>
           <p className="sidebar-label">PARTNER PORTAL</p>
           <nav className="sidebar-nav">
             <Link className="active" href="/affiliate/dashboard"><span>◈</span>Overview</Link>

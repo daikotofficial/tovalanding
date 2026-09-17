@@ -1,9 +1,11 @@
 import Link from "next/link";
-export const metadata = { title: "Privacy Policy — Tova Solutions" };
+import SiteFooter from "../../components/site-footer";
+export const metadata = { title: "Privacy Policy — Tova ERP" };
 export default function Page() {
   return (
+    <>
     <main className="legal-page">
-      <Link href="/">← Tova Solutions home</Link>
+      <Link href="/">← Tova ERP home</Link>
       <p className="eyebrow">TRUST CENTER</p>
       <h1>Privacy Policy</h1>
       <p>Last updated: March 11, 2026</p>
@@ -54,5 +56,7 @@ export default function Page() {
         · <Link href="/cookies">Cookies</Link>
       </nav>
     </main>
+    <SiteFooter />
+    </>
   );
 }
