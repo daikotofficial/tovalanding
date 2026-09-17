@@ -1,0 +1,21 @@
+{
+  "name": "tova-erp-platform",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0 --port 4173",
+    "build": "NEXT_BUILD_DIR=.next-build next build",
+    "start": "NEXT_BUILD_DIR=.next-build next start --hostname 0.0.0.0 --port ${PORT:-4173}",
+    "test": "playwright test",
+    "format": "prettier --write app components lib tests next.config.mjs playwright.config.mjs package.json README.md"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.4.1",
+    "next": "^16.3.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "prettier": "^3.9.6"
+  }
+}
