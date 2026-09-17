@@ -15,7 +15,7 @@ Use .env.example when setting up another environment.
 - ALLOWED_ORIGINS: comma-separated browser origins allowed for secure form mutations. Set production to https://tova.com.ng,https://www.tova.com.ng.
 - DATABASE_URL: production PostgreSQL connection string. When present, all application data uses PostgreSQL.
 - DATABASE_PATH: local SQLite database file used only when DATABASE_URL is absent.
-- DATABASE_SSL: optional; set to `disable` only for a trusted local PostgreSQL instance.
+- DATABASE_SSL: `verify` by default; set to `allow-insecure` for encrypted Render PostgreSQL connections that use a self-signed certificate. Use `disable` only for trusted local PostgreSQL.
 - MAIL_TRANSPORT: local for development, mailgun for real delivery.
 - PAYOUT_MINIMUM_MINOR: minimum payout balance in minor currency units; the launch default is 5000000 (₦50,000).
 - MAILGUN_API_KEY, MAILGUN_DOMAIN, MAILGUN_FROM: your Mailgun account values.
