@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { failure, input, passwordError } from "../../../../lib/auth";
 import db, { makeCode } from "../../../../lib/db";
 import { sendMail } from "../../../../lib/mail";
+import { approvalAffiliateEmail } from "../../../../lib/email-templates";
 import {
   currentSuperadmin,
   createAdminUser,
@@ -280,6 +281,7 @@ export async function POST(req) {
       await sendMail({
         to: affiliate.email,
         subject: "Your Tova affiliate application was approved",
+        html: approvalAffiliateEmail({ name: affiliate.name, code }),
         text:
           "Hello, " +
           affiliate.name +

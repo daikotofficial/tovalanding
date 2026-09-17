@@ -12,6 +12,7 @@ import {
   failure,
 } from "../../../../lib/auth";
 import { sendMail } from "../../../../lib/mail";
+import { welcomeAffiliateEmail } from "../../../../lib/email-templates";
 export async function POST(req) {
   try {
     const data = await input(req),
@@ -44,6 +45,7 @@ export async function POST(req) {
         await sendMail({
           to: email,
           subject: "Your TovaERP affiliate account",
+          html: welcomeAffiliateEmail(user.name),
           text:
             "Hello, " +
             user.name +
