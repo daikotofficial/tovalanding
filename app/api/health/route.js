@@ -28,6 +28,14 @@ function validIntegrationConfig() {
   } catch { return false; }
 }
 
+function databaseDiagnostic(error) {
+  const code = error?.code || error?.cause?.code || "UNKNOWN";
+  const message = String(error?.message || error || "Unknown database error")
+    .replace(/postgres(?:ql)?:\/\/[^\s]+/gi, "postgres://[redacted]")
+    .slice(0, 300);
+  return { code, message };
+}
+
 export async function GET() {
   try {
     await db.prepare("SELECT 1").get();
@@ -56,7 +64,8 @@ export async function GET() {
       { ok, checks },
       { status: ok ? 200 : 503, headers: { "Cache-Control": "no-store" } },
     );
-  } catch {
+  } catch (error) {
+    console.error("Production database health check failed", databaseDiagnostic(error));
     return NextResponse.json(
       { ok: false, checks: { database: false } },
       { status: 503, headers: { "Cache-Control": "no-store" } },
