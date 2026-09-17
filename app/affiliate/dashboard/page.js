@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { currentUser } from "../../../lib/auth";
 import db from "../../../lib/db";
 import AccountActions from "../../../components/account-actions";
+import BrandLogo from "../../../components/brand-logo";
 import PayoutAction from "../../../components/payout-action";
 import ReferralCredentials from "../../../components/referral-credentials";
 import { PAYOUT_MINIMUM_MINOR, PAYOUT_PROCESSING_DAYS } from "../../../lib/payout-policy";
@@ -42,7 +43,7 @@ export default async function Dashboard() {
     return (
       <>
         <header className="app-header">
-          <Link className="logo" href="/">Tova ERP</Link>
+          <Link className="logo" href="/"><BrandLogo /></Link>
           <AccountActions />
         </header>
         <main className="review-page">
@@ -59,7 +60,7 @@ export default async function Dashboard() {
     <>
       <header className="app-header">
         <Link className="logo" href="/">
-          Tova ERP
+          <BrandLogo />
         </Link>
         <nav>
           <Link href="/#products">Products</Link>
@@ -67,7 +68,7 @@ export default async function Dashboard() {
       </header>
       <main className="dashboard-shell">
         <aside className="dashboard-sidebar">
-          <Link className="logo" href="/">Tova ERP</Link>
+          <Link className="logo" href="/"><BrandLogo /></Link>
           <p className="sidebar-label">PARTNER PORTAL</p>
           <nav className="sidebar-nav">
             <Link className="active" href="/affiliate/dashboard"><span>◈</span>Overview</Link>

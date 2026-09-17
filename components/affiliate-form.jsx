@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import ChannelSelect from "./channel-select";
 import PasswordInput from "./password-input";
+import { useToast } from "./toast";
 
 export default function AffiliateForm({ signup = false }) {
   const [step, setStep] = useState("details");
@@ -20,6 +21,7 @@ export default function AffiliateForm({ signup = false }) {
   });
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  const { push } = useToast();
   const passwordChecks = [
     [form.password.length >= 12, "12 or more characters"],
     [/[A-Z]/.test(form.password), "One uppercase letter"],
@@ -43,6 +45,7 @@ export default function AffiliateForm({ signup = false }) {
       return true;
     } catch (error) {
       setError(error.message);
+      push(error.message, "error");
       return false;
     } finally {
       setBusy(false);
@@ -54,7 +57,10 @@ export default function AffiliateForm({ signup = false }) {
       if (await request("/api/affiliate/login", form))
         window.location.assign("/affiliate/dashboard");
     } else if (signup) {
-      if (await request("/api/affiliate/register", form)) setStep("verify");
+      if (await request("/api/affiliate/register", form)) {
+        setStep("verify");
+        push("Verification code sent. Check your email to continue.", "success");
+      }
     } else {
       if (await request("/api/affiliate/login", form))
         window.location.assign("/affiliate/dashboard");

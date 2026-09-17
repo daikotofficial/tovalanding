@@ -1,9 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 import { cookies } from "next/headers";
 import Pricing from "../components/pricing";
 import MobileMenu from "../components/mobile-menu";
 import SiteFooter from "../components/site-footer";
+import BrandLogo from "../components/brand-logo";
 const areas = [
   ["Financial Management", "Accounting, valuation, and statutory reports"],
   ["Operational Workflows", "Requests, approvals, and execution tracking"],
@@ -74,7 +74,7 @@ export default async function Home() {
     <>
       <header className="header">
         <Link className="logo" href="/">
-          <Image src="/tova-erp-logo.png" alt="Tova ERP" width={116} height={58} priority />
+          <BrandLogo />
         </Link>
         <nav>
           <Link href="#products">Products</Link>

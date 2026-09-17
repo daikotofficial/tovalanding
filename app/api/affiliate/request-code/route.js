@@ -11,9 +11,9 @@ export async function POST(req) {
   try {
     const data = await input(req),
       email = emailAddress(data.email);
-    if (!limit("request:global", 100) || !limit("email:" + email, 3))
+    if (!(await limit("request:global", 100)) || !(await limit("email:" + email, 3)))
       return failure("Please wait before requesting another code.", 429);
-    if (db.prepare("SELECT id FROM affiliates WHERE email=?").get(email))
+    if (await db.prepare("SELECT id FROM affiliates WHERE email=?").get(email))
       await challenge(email);
     return NextResponse.json({ ok: true });
   } catch (error) {

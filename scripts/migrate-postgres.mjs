@@ -1,0 +1,26 @@
+import fs from "node:fs/promises";
+import pg from "pg";
+
+const { Pool } = pg;
+const url = process.env.DATABASE_URL;
+if (!url) throw new Error("DATABASE_URL is required.");
+
+const pool = new Pool({
+  connectionString: url,
+  max: Number(process.env.DATABASE_POOL_MAX || 10),
+    ssl: process.env.DATABASE_SSL === "disable" ? false : { rejectUnauthorized: true },
+});
+
+try {
+  const schema = await fs.readFile(new URL("../db/schema.sql", import.meta.url), "utf8");
+  await pool.query("BEGIN");
+  await pool.query(schema);
+  await pool.query("COMMIT");
+  console.log("PostgreSQL schema is ready.");
+} catch (error) {
+  await pool.query("ROLLBACK").catch(() => {});
+  console.error("PostgreSQL migration failed:", error.message);
+  process.exitCode = 1;
+} finally {
+  await pool.end();
+}

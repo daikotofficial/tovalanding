@@ -10,7 +10,7 @@ export async function POST(req) {
   }
   const token = (await cookies()).get("tova_session")?.value;
   if (token)
-    db.prepare("DELETE FROM sessions WHERE token_hash=?").run(hash(token));
+    await db.prepare("DELETE FROM sessions WHERE token_hash=?").run(hash(token));
   const response = NextResponse.json({ ok: true });
   response.cookies.delete("tova_session");
   response.cookies.delete("tova_affiliate");

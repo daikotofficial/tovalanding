@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import db from "../../../lib/db";
 export async function GET(req, { params }) {
   const { code } = await params;
-  const exists = db
+  const exists = await db
     .prepare(
       "SELECT id FROM affiliates WHERE code=? AND verified=1 AND status='active'",
     )

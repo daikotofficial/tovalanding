@@ -20,7 +20,7 @@ export async function POST(req) {
         { error: "Integration not authorized." },
         { status: 401 },
       );
-    return NextResponse.json(recordSubscription(data));
+    return NextResponse.json(await recordSubscription(data));
   } catch (error) {
     return NextResponse.json(
       {

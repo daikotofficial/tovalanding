@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 const columns = [
   {
@@ -51,9 +50,7 @@ export default function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer-main">
         <div className="site-footer-brand">
-          <Link className="logo" href="/">
-            <Image src="/tova-erp-logo.png" alt="Tova ERP" width={116} height={58} />
-          </Link>
+          <Link className="footer-wordmark" href="/">Tova ERP</Link>
           <p>Connected software for real business functions.</p>
           <a className="site-footer-email" href="mailto:support@tova.com.ng">
             support@tova.com.ng

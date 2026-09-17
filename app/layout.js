@@ -1,4 +1,5 @@
 import Theme from "../components/theme";
+import { ToastProvider } from "../components/toast";
 export const metadata = {
   title: "Tova ERP — ERP software built around real business functions",
   description:
@@ -12,7 +13,7 @@ export default function RootLayout({ children }) {
           Skip to content
         </a>
         <Theme />
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

@@ -1,13 +1,14 @@
 import Link from "next/link";
 import AffiliateForm from "../../components/affiliate-form";
 import SiteFooter from "../../components/site-footer";
+import BrandLogo from "../../components/brand-logo";
 export const metadata = { title: "Affiliate registration — Tova ERP" };
 export default function Affiliate() {
   return (
     <>
       <header className="app-header">
         <Link className="logo" href="/">
-          Tova ERP
+          <BrandLogo />
         </Link>
         <nav>
           <Link href="/#products">Products</Link>

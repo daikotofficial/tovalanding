@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "../../../lib/auth";
 import AccountActions from "../../../components/account-actions";
+import BrandLogo from "../../../components/brand-logo";
 import PayoutSettings from "../../../components/payout-settings";
 import PasswordSettings from "../../../components/password-settings";
 
@@ -11,7 +12,7 @@ export default async function Settings() {
   const user = await currentUser();
   if (!user) redirect("/affiliate/login");
   return <>
-    <header className="app-header"><Link className="logo" href="/">Tova ERP</Link><nav><Link href="/affiliate/dashboard">Dashboard</Link><AccountActions /></nav></header>
+    <header className="app-header"><Link className="logo" href="/"><BrandLogo /></Link><nav><Link href="/affiliate/dashboard">Dashboard</Link><AccountActions /></nav></header>
     <main className="settings-page">
       <Link className="back-link" href="/affiliate/dashboard">← Back to dashboard</Link>
       <p className="eyebrow">ACCOUNT SETTINGS</p><h1>Payout settings</h1>

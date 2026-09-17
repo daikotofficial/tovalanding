@@ -22,7 +22,7 @@ export async function POST(req) {
       );
     if (passwordIssue || data.password !== data.passwordConfirmation)
       return failure(passwordIssue || "Your passwords do not match.");
-    if (!limit("signup:global", 100) || !limit("email:" + email, 3))
+    if (!(await limit("signup:global", 100)) || !(await limit("email:" + email, 3)))
       return failure("Please wait before requesting another code.", 429);
     if (
       String(data.phone || "").length > 40 ||
@@ -34,7 +34,7 @@ export async function POST(req) {
     // The unique constraint arbitrates concurrent inserts; retry random code collisions.
     for (let attempt = 0; attempt < 5; attempt++) {
       try {
-        db.prepare(
+        await db.prepare(
           "INSERT INTO affiliates(name,email,phone,location,channel,code,verification_code,password_hash,password_salt,password_updated_at,created_at) VALUES(?,?,?,?,?,?,?, ?,?,?,?) ON CONFLICT(email) DO NOTHING",
         ).run(
           name,

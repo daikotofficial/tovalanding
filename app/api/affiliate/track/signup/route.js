@@ -28,7 +28,7 @@ export async function POST(req) {
         { status: 401 },
       );
     return NextResponse.json(
-      recordSignup({ ...data, source: data.source ?? "link" }),
+      await recordSignup({ ...data, source: data.source ?? "link" }),
     );
   } catch {
     return NextResponse.json(

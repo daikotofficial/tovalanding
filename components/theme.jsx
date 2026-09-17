@@ -67,6 +67,8 @@ body {
   font-weight: 700;
   font-size: 16px;
 }
+.brand-logo-crop {position:relative;display:block;width:116px;height:44px;overflow:hidden;flex:0 0 116px;}
+.brand-logo-image {position:absolute;left:0;top:-34px;width:116px;height:auto;max-width:none;}
 .logo span {
   font: bold 20px "Poppins", sans-serif;
   color: #168a61;
@@ -1321,15 +1323,21 @@ footer div {flex-wrap:wrap;}
 .auth-card .solid {background:var(--green);transition:background .18s;}
 .auth-card .solid:hover:not(:disabled) {background:#087b5c;}
 .channel-field {position:relative;min-width:0;}
-.field-label {display:block;font-size:11px;font-weight:700;color:#45586c;}
-.channel-trigger {display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;padding:12px;margin-top:7px;min-height:44px;border:1px solid #c9d9d1;border-radius:4px;background:#fcfefd;color:var(--navy);font:12px 'Poppins',sans-serif;cursor:pointer;}
+.field-label {display:block;font-size:12px;font-weight:700;color:#45586c;}
+.channel-trigger {display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;padding:13px 14px;margin-top:7px;min-height:48px;border:1px solid #c9d9d1;border-radius:7px;background:#fcfefd;color:var(--navy);font:500 14px 'Poppins',sans-serif;cursor:pointer;transition:border-color .18s,box-shadow .18s,background .18s;}
 .channel-trigger:hover {border-color:#6eb69b;}
 .channel-trigger[aria-expanded=true] {border-color:var(--green);box-shadow:0 0 0 3px rgba(7,153,110,.1);}
 .channel-trigger[aria-expanded=true] svg {transform:rotate(180deg);}
 .channel-options {position:absolute;top:100%;left:0;right:0;z-index:10;list-style:none;margin:6px 0 0;padding:6px;border:1px solid #c9dfd3;border-radius:8px;background:white;box-shadow:0 12px 30px rgba(7,23,47,.12);max-height:250px;overflow-y:auto;}
-.channel-options li {display:flex;justify-content:space-between;gap:12px;padding:11px 10px;border-radius:4px;cursor:pointer;color:var(--navy);font-size:12px;}
+.channel-options li {display:flex;justify-content:space-between;gap:12px;padding:12px 11px;border-radius:6px;cursor:pointer;color:var(--navy);font:500 14px 'Poppins',sans-serif;line-height:1.4;}
 .channel-options li[data-active=true],.channel-options li:hover {background:#e5f5ed;color:#076c50;}
 .channel-options li[aria-selected=true] {color:#087b5c;font-weight:600;}
+.toast-viewport {position:fixed;right:22px;bottom:22px;z-index:1000;display:grid;gap:10px;width:min(390px,calc(100vw - 32px));pointer-events:none;}
+.toast {display:flex;align-items:center;gap:11px;padding:13px 14px;border:1px solid #cfe2d9;border-radius:12px;background:#fff;color:#18352c;box-shadow:0 18px 45px rgba(7,23,47,.18);font:500 13px/1.45 'Poppins',sans-serif;pointer-events:auto;animation:toast-in .2s ease-out;}
+.toast-mark {display:grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border-radius:50%;background:#e1f6eb;color:#087b5c;font-weight:700;}
+.toast-error {border-color:#f0c9c1;color:#783d35;}.toast-error .toast-mark {background:#ffe6e0;color:#b34e3f;}.toast-success {border-color:#bfe3d0;}.toast-info .toast-mark {background:#e6eff8;color:#2d628c;}
+.toast button {margin-left:auto;border:0;background:transparent;color:#789087;font-size:20px;line-height:1;cursor:pointer;padding:2px 4px;}
+@keyframes toast-in {from {opacity:0;transform:translateY(8px)}to {opacity:1;transform:translateY(0)}}
 @media(max-width:1000px){
  .header {gap:16px;}
  .header nav {gap:16px;}
@@ -1441,6 +1449,44 @@ footer div {flex-wrap:wrap;}
 .password-toggle {position:absolute;right:5px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:4px;background:transparent;color:#587067;cursor:pointer;display:grid;place-items:center;}
 .password-toggle svg {display:block;}
 .password-toggle:hover,.password-toggle:focus-visible {background:#eaf7f0;color:#087b5c;}
+.site-footer {display:block!important;background:#0d172c;color:#eaf5f1;border-top:0;padding:64px max(24px,calc((100% - 1320px) / 2)) 28px;}
+.site-footer a {color:#d8e9e3;text-decoration:none;}
+.site-footer a:hover,.site-footer a:focus-visible {color:#74e0b7;}
+.site-footer-main {display:grid!important;grid-template-columns:minmax(220px,.8fr) 2fr;align-items:start;justify-content:initial;gap:64px;max-width:1320px;margin:0 auto;padding:0;}
+.site-footer-brand {display:block!important;min-width:0;}
+.site-footer-brand .footer-wordmark {display:inline-block;color:#74e0b7;font-size:24px;font-weight:700;letter-spacing:-.04em;text-decoration:none;}
+.site-footer-brand p {max-width:230px;margin:18px 0 12px;color:#a6b9b5;font-size:13px;line-height:1.7;}
+.site-footer-email {font-size:13px;color:#74e0b7!important;overflow-wrap:anywhere;}
+.site-footer-columns {display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));align-items:start;justify-content:initial;gap:28px;min-width:0;}
+.site-footer-column {display:block!important;min-width:0;}
+.site-footer-column h2 {margin:0 0 18px;color:#fff;font-size:13px;font-weight:700;}
+.site-footer-column nav {display:grid!important;justify-content:initial;gap:11px;}
+.site-footer-column nav a {font-size:13px;line-height:1.45;}
+.site-footer-bottom {display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1320px;margin:58px auto 0;padding-top:22px;border-top:1px solid rgba(190,220,209,.18);color:#829795;font-size:10px;letter-spacing:.01em;}
+.site-footer-bottom span {color:#8fc8b2;text-transform:uppercase;letter-spacing:.18em;font-size:10px;}
+/* Final shared type and layout scale. Keep all product, affiliate, and admin
+   surfaces aligned instead of allowing legacy selectors to compete. */
+.header,.app-header {height:72px;min-height:72px;padding-left:max(24px,calc((100% - 1320px) / 2));padding-right:max(24px,calc((100% - 1320px) / 2));}
+.header nav a,.app-header nav a {font:600 14px/1.4 "Poppins",sans-serif;}
+.header .top-button,.header .button,.app-header button,.app-header>a:not(.logo) {font:600 14px/1.4 "Poppins",sans-serif;}
+.logo {font-size:14px;}
+.auth-card,.admin-login-form,.admin-tools,.settings-card {font-family:"Poppins",Arial,sans-serif;}
+.auth-card h2 {font-size:28px;line-height:1.2;}
+.auth-card .form-help,.auth-card label,.auth-card input,.auth-card select,.auth-card .solid {font-size:14px;line-height:1.55;}
+.auth-card .switch {font-size:14px;}
+.admin-sidebar nav a {font:600 14px/1.45 "Poppins",sans-serif;}
+.admin-content {font-family:"Poppins",Arial,sans-serif;}
+.admin-page-heading h1 {font-size:42px;line-height:1.15;}
+.admin-page-heading p:not(.eyebrow),.admin-tools>p {font-size:14px;line-height:1.6;}
+.admin-summary-grid small,.admin-summary-grid span {font-size:13px;}
+.admin-summary-grid strong {font-size:30px;}
+.admin-section-title,.admin-tools h2 {font-size:22px;line-height:1.3;}
+.admin-row,.admin-list-row {font-size:14px;line-height:1.5;}
+.admin-row small,.admin-list-row small {font-size:12px;}
+.admin-status-badge,.admin-affiliate-details summary {font-size:13px;}
+.admin-table-head,.admin-list-heading {font-size:11px;}
+.site-footer-column nav a {font-size:14px;line-height:1.5;}
+.site-footer-brand p,.site-footer-email {font-size:14px;line-height:1.6;}
 @media(max-width:800px){
  .mobile-menu {display:block;}
  .header {position:sticky;}
@@ -1449,6 +1495,16 @@ footer div {flex-wrap:wrap;}
  .auth-card input,.auth-card select,.settings-form input,.admin-login-form input {min-height:44px;}
  .password-toggle {width:40px;height:40px;}
  .button,.solid,.top-button {min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
+ .site-footer {padding:48px 20px 24px;}
+ .site-footer-main {display:block!important;}
+ .site-footer-brand {margin-bottom:40px;}
+ .site-footer-columns {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 20px;}
+ .site-footer-column nav {gap:10px;}
+ .site-footer-column nav a {font-size:12px;}
+ .site-footer-bottom {display:grid;gap:12px;margin-top:42px;line-height:1.6;}
+ .header,.app-header {min-height:68px;height:auto;padding:12px 20px;}
+ .header nav a,.app-header nav a {font-size:13px;}
+ .admin-page-heading h1 {font-size:34px;}
 }
 `;
 export default function Theme() {
