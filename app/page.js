@@ -269,7 +269,7 @@ export default async function Home() {
             )}
           </div>
         </section>
-        <Pricing />
+        <Pricing referralCode={referralCode} />
         <section className="referral-banner" aria-labelledby="referral-title">
           <div className="referral-copy">
             <p className="eyebrow">TOVA AFFILIATE PROGRAM</p>

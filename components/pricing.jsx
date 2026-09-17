@@ -38,8 +38,14 @@ const products = [
 const money = (value) =>
   "₦" +
   new Intl.NumberFormat("en-NG", { maximumFractionDigits: 0 }).format(value);
-export default function Pricing() {
+export default function Pricing({ referralCode = "" }) {
   const [annual, setAnnual] = useState(false);
+  const addReferralCode = (href) => {
+    if (!referralCode) return href;
+    const url = new URL(href);
+    url.searchParams.set("ref", referralCode);
+    return url.toString();
+  };
   const price = (amount) => money(annual ? amount * 12 * 0.95 : amount);
   return (
     <section
@@ -98,7 +104,7 @@ export default function Pricing() {
                 </li>
               ))}
             </ul>
-            <a href={product.href} target="_blank" rel="noopener noreferrer">
+            <a href={addReferralCode(product.href)} target="_blank" rel="noopener noreferrer">
               Compare full plans <span aria-hidden="true">↗</span>
             </a>
           </article>

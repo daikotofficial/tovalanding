@@ -95,6 +95,10 @@ a successful paid subscription:
 - `POST /api/affiliate/track/signup` with `{ product, externalId, email, referralCode, source }`.
 - `POST /api/affiliate/track/subscription` with `{ product, externalId, amountMinor, currency }`.
 
+The currently connected product identifiers are `tovafixedasset`, `tovabooks`, and
+`tovapos`. Product links from the landing page preserve the referral code for all
+three products, including links in the pricing section.
+
 Send `x-tova-integration-key` when `INTEGRATION_API_KEY` is configured. Subscription
 events are idempotent per product/customer ID, so retries do not create duplicate
 commissions. The referral code must be passed from the referral URL/cookie into the

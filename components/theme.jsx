@@ -47,6 +47,7 @@ body {
   background: white;
   color: var(--navy);
   font-family: "Poppins", Arial, sans-serif;
+  overflow-x: hidden;
 }
 .header {
   height: 66px;
@@ -1449,6 +1450,9 @@ footer div {flex-wrap:wrap;}
 .password-toggle {position:absolute;right:5px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:4px;background:transparent;color:#587067;cursor:pointer;display:grid;place-items:center;}
 .password-toggle svg {display:block;}
 .password-toggle:hover,.password-toggle:focus-visible {background:#eaf7f0;color:#087b5c;}
+.back-to-top {position:fixed;right:22px;bottom:22px;z-index:80;display:grid;place-items:center;width:44px;height:44px;border:1px solid #b8d8ca;border-radius:50%;background:#07996e;color:#fff;box-shadow:0 10px 24px rgba(7,23,47,.2);cursor:pointer;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .18s,visibility .18s,transform .18s,background .18s;}
+.back-to-top.is-visible {opacity:1;visibility:visible;transform:translateY(0);}
+.back-to-top:hover,.back-to-top:focus-visible {background:#087b5c;}
 .site-footer {display:block!important;background:#0d172c;color:#eaf5f1;border-top:0;padding:64px max(24px,calc((100% - 1320px) / 2)) 28px;}
 .site-footer a {color:#d8e9e3;text-decoration:none;}
 .site-footer a:hover,.site-footer a:focus-visible {color:#74e0b7;}
@@ -1489,7 +1493,23 @@ footer div {flex-wrap:wrap;}
 .site-footer-brand p,.site-footer-email {font-size:14px;line-height:1.6;}
 @media(max-width:800px){
  .mobile-menu {display:block;}
- .header {position:sticky;}
+ .header {position:sticky;flex-wrap:nowrap;align-items:center;gap:12px;}
+ .header > nav {display:none;}
+ .header .mobile-menu-panel {display:grid;}
+ .header .logo {min-width:0;}
+ .header .mobile-menu {margin-left:auto;}
+ .mobile-menu-button {display:grid;place-items:center;width:46px;height:46px;border:1px solid #a9cbbd;border-radius:8px;background:#fff;color:#07172f;box-shadow:0 2px 8px rgba(7,23,47,.08);}
+ .mobile-menu-panel {right:0;top:54px;min-width:230px;padding:10px;box-shadow:0 18px 38px rgba(7,23,47,.2);}
+ .mobile-menu-panel a {padding:13px 14px;font-size:14px;}
+ .app-header {flex-wrap:nowrap;gap:14px;}
+ .app-header > a:not(.logo) {min-width:0;text-align:right;overflow-wrap:anywhere;}
+ .app-header nav {display:flex;align-items:center;gap:12px;margin-left:auto;min-width:0;}
+ .app-header nav a {white-space:nowrap;}
+ .hero {width:100%;min-width:0;padding:44px 20px 56px;}
+ .hero h1 {font-size:clamp(34px,10vw,44px);line-height:1.12;}
+ .lead {font-size:15px;line-height:1.65;}
+ .hero-actions {align-items:stretch;}
+ .hero-actions .button {flex:1 1 150px;}
  .admin-list-card,.admin-table-card {overflow-x:auto;-webkit-overflow-scrolling:touch;}
  .admin-list-heading,.admin-list-row,.admin-table-head,.admin-row {min-width:760px;}
  .auth-card input,.auth-card select,.settings-form input,.admin-login-form input {min-height:44px;}
@@ -1504,7 +1524,10 @@ footer div {flex-wrap:wrap;}
  .site-footer-bottom {display:grid;gap:12px;margin-top:42px;line-height:1.6;}
  .header,.app-header {min-height:68px;height:auto;padding:12px 20px;}
  .header nav a,.app-header nav a {font-size:13px;}
+ .brand-logo-crop {width:100px;height:40px;flex-basis:100px;}
+ .brand-logo-image {width:100px;top:-29px;}
  .admin-page-heading h1 {font-size:34px;}
+ .back-to-top {right:16px;bottom:16px;}
 }
 `;
 export default function Theme() {
