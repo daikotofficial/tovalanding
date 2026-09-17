@@ -12,7 +12,10 @@ Use .env.example when setting up another environment.
 ### Configuration
 
 - APP_URL: canonical origin. Local development uses http://localhost:4173; production uses https://tova.com.ng.
-- DATABASE_PATH: local SQLite database file. Existing affiliate records are preserved.
+- ALLOWED_ORIGINS: comma-separated browser origins allowed for secure form mutations. Set production to https://tova.com.ng,https://www.tova.com.ng.
+- DATABASE_URL: production PostgreSQL connection string. When present, all application data uses PostgreSQL.
+- DATABASE_PATH: local SQLite database file used only when DATABASE_URL is absent.
+- DATABASE_SSL: optional; set to `disable` only for a trusted local PostgreSQL instance.
 - MAIL_TRANSPORT: local for development, mailgun for real delivery.
 - PAYOUT_MINIMUM_MINOR: minimum payout balance in minor currency units; the launch default is 5000000 (₦50,000).
 - MAILGUN_API_KEY, MAILGUN_DOMAIN, MAILGUN_FROM: your Mailgun account values.
@@ -21,7 +24,7 @@ Use .env.example when setting up another environment.
 - PAYOUT_ENCRYPTION_KEY: 32-byte key used for payout details at rest.
 - INTEGRATION_API_KEY: optional shared secret accepted by the product-event endpoints.
 - INTEGRATION_KEYS_JSON: optional per-product secret map, preferred over one shared key.
-- INTEGRATION_PRODUCTS: optional comma-separated product allowlist.
+- INTEGRATION_PRODUCTS: comma-separated product allowlist; required in production.
 
 There are no default administrator credentials. Set SUPERADMIN_EMAIL and
 SUPERADMIN_PASSWORD in the deployment environment, then sign in at /admin/login.
@@ -113,11 +116,11 @@ send the same `product` and stable `externalId`, and treat a successful response
 idempotent. The signup event must happen only after the product account is created;
 the subscription event must happen only after payment is verified server-side.
 
-SQLite is a local development database, not a 100-million-account deployment plan.
-PostgreSQL requires an adapter/schema migration and data transfer; changing an
-environment value alone will not migrate SQLite. That migration, multi-instance
-rate limiting, email-delivery retries, backup/restore, and infrastructure load tests
-remain necessary before a large public rollout.
+PostgreSQL is the production database. Set DATABASE_URL from the Render PostgreSQL
+instance and run `npm run db:migrate` once before starting the Web Service. SQLite
+remains a local fallback only. Multi-instance rate limiting, email-delivery retries,
+backup/restore, and infrastructure load tests remain necessary before a large public
+rollout.
 
 ## Reference
 
