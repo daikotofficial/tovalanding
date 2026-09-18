@@ -198,8 +198,8 @@ export default function AffiliateForm({ signup = false }) {
                 </label>
                 <p className="form-help">
                   Read our <Link href="/privacy">privacy policy</Link>.
-                  Affiliates earn 20% of the VAT-exclusive value of qualifying
-                  paid subscriptions. Payouts are reviewed by the Tova team.
+                  Affiliates earn 20% on qualifying paid subscriptions. Payouts
+                  are reviewed by the Tova team.
                 </p>
               </>
             )}

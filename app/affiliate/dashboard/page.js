@@ -172,8 +172,8 @@ export default async function Dashboard() {
             <div>
               <h2>Payouts</h2>
               <p className="fine">
-                You earn 20% of the VAT-exclusive value of every qualifying paid
-                subscription. Request a payout anytime after your approved
+                You earn 20% on every qualifying paid subscription. Request a
+                payout anytime after your approved
                 balance reaches ₦50,000. Requests are reviewed and paid manually
                 within {PAYOUT_PROCESSING_DAYS} business days.
               </p>

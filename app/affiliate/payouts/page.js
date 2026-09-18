@@ -67,8 +67,8 @@ export default async function PayoutsPage() {
             <div>
               <h2>Request a payout</h2>
               <p className="fine">
-                You earn 20% of the VAT-exclusive value of qualifying
-                subscriptions. Requests are reviewed and paid manually within{" "}
+                You earn 20% on qualifying paid subscriptions. Requests are
+                reviewed and paid manually within{" "}
                 {PAYOUT_PROCESSING_DAYS} business days.
               </p>
               <div className="payout-line">

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { currentUser, failure, checkOrigin } from "../../../../lib/auth";
 import db from "../../../../lib/db";
 import { PAYOUT_MINIMUM_MINOR } from "../../../../lib/payout-policy";
+import { sendMail } from "../../../../lib/mail";
 
 export async function POST(req) {
   try { checkOrigin(req); } catch { return failure("Request origin not allowed.", 403); }
@@ -29,5 +30,22 @@ export async function POST(req) {
   if (payout?.error === "PAYOUT_PENDING") return failure("Your current payout request is still being processed.");
   if (payout?.error === "PAYOUT_MINIMUM") return failure("Payouts are available once your approved balance reaches ₦50,000.");
   if (!payout) return failure("There is no approved balance available for payout.");
+  const adminRows = await db.prepare("SELECT email FROM admin_users WHERE status='active'").all();
+  const recipients = Array.from(
+    new Set(
+      [process.env.SUPERADMIN_EMAIL, ...adminRows.map((row) => row.email)]
+        .map((email) => String(email || "").trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  );
+  await Promise.all(
+    recipients.map((to) =>
+      sendMail({
+        to,
+        subject: "New affiliate payout request",
+        text: `A payout request of ₦${(payout.amount / 100).toLocaleString()} has been submitted by an affiliate. Review it in the admin portal.`,
+      }).catch((error) => console.error("Payout request notification failed", { to, error: error?.message })),
+    ),
+  );
   return NextResponse.json({ payout });
 }

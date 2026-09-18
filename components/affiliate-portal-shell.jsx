@@ -46,7 +46,7 @@ export default function AffiliatePortalShell({
         </header>
         {children}
         <footer className="dashboard-footer">
-          <span>Affiliate program · 20% commission after VAT exclusion</span>
+          <span>Affiliate program · 20% commission on qualifying subscriptions</span>
           <Link href="/privacy">Privacy & terms</Link>
         </footer>
       </section>

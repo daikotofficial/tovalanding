@@ -21,12 +21,11 @@ export default function Affiliate() {
           <h1>Introduce businesses to Tova.</h1>
           <p>
             Share one simple link, bring the right businesses to Tova, and earn
-            20% of the VAT-exclusive value of every qualifying subscription from
-            your referrals.
+            20% of every qualifying subscription from your referrals.
           </p>
           <div className="affiliate-rate">
             <strong>20%</strong>
-            <span>commission after 7.5% VAT exclusion</span>
+            <span>commission on qualifying subscriptions</span>
           </div>
           <div className="auth-points">
             <span>

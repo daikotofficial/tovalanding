@@ -1408,7 +1408,7 @@ footer div {flex-wrap:wrap;}
 .referral-actions>.button {display:inline-flex;gap:22px;align-items:center;padding:13px 18px;background:#d7f5e5;color:#0d3d2d;border:1px solid transparent;}
 .referral-actions>.button:hover {background:white;}
 .referral-login {color:#d1e3db;font-size:12px;text-decoration:none;text-underline-offset:4px;}
-.referral-login:hover {text-decoration:underline;color:white;}
+.referral-login:hover {text-decoration:none;color:white;}
 .referral-steps {list-style:none;margin:0;padding:0;align-self:center;}
 .referral-steps li {display:flex;gap:18px;padding:22px 0;border-bottom:1px solid #346058;}
 .referral-steps li:last-child {border:0;}
@@ -1470,6 +1470,8 @@ footer div {flex-wrap:wrap;}
 .site-footer-column nav a {font-size:13px;line-height:1.45;}
 .site-footer-bottom {display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1320px;margin:58px auto 0;padding-top:22px;border-top:1px solid rgba(190,220,209,.18);color:#829795;font-size:10px;letter-spacing:.01em;}
 .site-footer-bottom span {color:#8fc8b2;text-transform:uppercase;letter-spacing:.18em;font-size:10px;}
+.app-header a,.auth-layout a,.auth-card a,.login-page a,.portal-shell a,.settings-page a,.review-page a {text-decoration:none!important;}
+.app-header a:hover,.auth-layout a:hover,.auth-card a:hover,.login-page a:hover,.portal-shell a:hover,.settings-page a:hover,.review-page a:hover {text-decoration:none!important;}
 
 /* Authenticated affiliate portal: one calm navigation system, no competing
    marketing header or duplicate page tabs. */

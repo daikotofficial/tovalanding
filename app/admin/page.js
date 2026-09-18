@@ -34,7 +34,7 @@ async function AffiliateTable({ rows }) {
       row,
       referrals: await db
         .prepare(
-          "SELECT product,referred_name,referred_email,source,status,subscription_expires_at,created_at FROM referrals WHERE affiliate_id=? ORDER BY id DESC LIMIT 10",
+          "SELECT product,referred_name,referred_company,referred_email,source,status,subscription_expires_at,created_at FROM referrals WHERE affiliate_id=? ORDER BY id DESC LIMIT 10",
         )
         .all(row.id),
       payouts: await db
@@ -108,8 +108,8 @@ async function AffiliateTable({ rows }) {
                 <strong>Referral activity</strong>
                 {referrals.map((item) => (
                   <span key={item.product + item.created_at}>
-                    {item.product} · {item.referred_name || "Referred customer"}{" "}
-                    · {item.referred_email || "Email unavailable"} ·{" "}
+                    {item.product} · {item.referred_name || item.referred_company || "Customer identity pending"}{" "}
+                    {item.referred_name && item.referred_company ? `· ${item.referred_company} ` : ""}· {item.referred_email || "Email pending"} ·{" "}
                     {item.status}
                     {item.subscription_expires_at
                       ? ` · Expires ${formatDate(item.subscription_expires_at)}`
