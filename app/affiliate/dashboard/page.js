@@ -28,7 +28,7 @@ export default async function Dashboard() {
   if (!user) redirect("/affiliate/login");
   const referrals = await db
     .prepare(
-      "SELECT r.product,r.referred_name,r.referred_email,r.subscription_expires_at,r.status,r.created_at,c.amount AS commission,c.status AS commission_status FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? ORDER BY r.id DESC LIMIT 50",
+      "SELECT r.product,r.referred_name,r.referred_company,r.referred_email,r.subscription_expires_at,r.status,r.created_at,c.amount AS commission,c.status AS commission_status FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? ORDER BY r.id DESC LIMIT 50",
     )
     .all(user.id);
   const totals = await db
@@ -146,7 +146,7 @@ export default async function Dashboard() {
                     <span>
                       <strong>{r.product}</strong>
                       <small>
-                        {r.referred_name || "Referred customer"} · {r.referred_email || "Email unavailable"} · Joined {formatDate(r.created_at)} · {r.subscription_expires_at ? `Expires ${formatDate(r.subscription_expires_at)}` : "Expiry pending"}
+                        {r.referred_name || r.referred_company || "Customer identity pending"} {r.referred_name && r.referred_company ? `· ${r.referred_company}` : ""} · {r.referred_email || "Email pending"} · Product: {r.product} · Joined {formatDate(r.created_at)} · {r.subscription_expires_at ? `Expires ${formatDate(r.subscription_expires_at)}` : "Expiry pending"}
                       </small>
                     </span>
                     <span className={`status-pill ${r.status}`}>

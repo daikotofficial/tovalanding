@@ -14,6 +14,7 @@ export async function POST(req) {
       !validProduct(data.product) ||
       !validText(data.externalId, 160) ||
       (data.customerName != null && !validText(data.customerName, 120)) ||
+      (data.companyName != null && !validText(data.companyName, 160)) ||
       (data.subscriptionExpiresAt != null &&
         !validText(data.subscriptionExpiresAt, 80))
     )

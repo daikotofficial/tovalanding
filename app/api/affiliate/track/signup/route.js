@@ -16,7 +16,8 @@ export async function POST(req) {
       !validText(data.externalId, 160) ||
       !validText(data.referralCode, 40) ||
       (data.source != null && !validText(data.source, 40)) ||
-      (data.referredName != null && !validText(data.referredName, 120))
+      (data.referredName != null && !validText(data.referredName, 120)) ||
+      (data.referredCompany != null && !validText(data.referredCompany, 160))
     )
       return NextResponse.json(
         { error: "product, externalId and referralCode are required." },
