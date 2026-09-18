@@ -13,13 +13,14 @@ export async function POST(req) {
     if (
       !validProduct(data.product) ||
       !validText(data.externalId, 160) ||
+      !validText(data.paymentReference || data.reference, 180) ||
       (data.customerName != null && !validText(data.customerName, 120)) ||
       (data.companyName != null && !validText(data.companyName, 160)) ||
       (data.subscriptionExpiresAt != null &&
         !validText(data.subscriptionExpiresAt, 80))
     )
       return NextResponse.json(
-        { error: "product and externalId are required." },
+        { error: "product, externalId and paymentReference are required." },
         { status: 400 },
       );
     if (!integrationAllowed(req, data.product.trim()))

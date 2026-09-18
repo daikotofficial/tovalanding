@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS referrals (
   product TEXT NOT NULL,
   external_id TEXT NOT NULL,
   referred_name TEXT,
+  referred_company TEXT,
   referred_email TEXT,
   source TEXT NOT NULL DEFAULT 'link',
   status TEXT NOT NULL DEFAULT 'registered',
@@ -90,9 +91,10 @@ CREATE TABLE IF NOT EXISTS commissions (
   amount BIGINT NOT NULL CHECK (amount > 0),
   rate INTEGER NOT NULL DEFAULT 20,
   currency TEXT NOT NULL DEFAULT 'NGN',
+  payment_reference TEXT NOT NULL DEFAULT '',
   status TEXT NOT NULL DEFAULT 'pending',
   created_at TIMESTAMPTZ NOT NULL,
-  UNIQUE(referral_id)
+  UNIQUE (referral_id, payment_reference)
 );
 
 CREATE TABLE IF NOT EXISTS payouts (

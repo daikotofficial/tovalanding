@@ -28,6 +28,15 @@ try {
     "ALTER TABLE referrals ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMPTZ",
   );
   await pool.query(
+    "ALTER TABLE commissions DROP CONSTRAINT IF EXISTS commissions_referral_id_key",
+  );
+  await pool.query(
+    "ALTER TABLE commissions ADD COLUMN IF NOT EXISTS payment_reference TEXT NOT NULL DEFAULT ''",
+  );
+  await pool.query(
+    "CREATE UNIQUE INDEX IF NOT EXISTS commissions_referral_payment_unique ON commissions(referral_id,payment_reference)",
+  );
+  await pool.query(
     "UPDATE commissions c SET amount=ROUND(c.amount * 200.0 / 107.5), rate=20 WHERE c.rate=10 AND NOT EXISTS (SELECT 1 FROM payout_commissions pc WHERE pc.commission_id=c.id)",
   );
   await pool.query("COMMIT");

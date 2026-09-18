@@ -3,11 +3,13 @@ import { redirect } from "next/navigation";
 import { currentSuperadmin } from "../../lib/superadmin";
 import db from "../../lib/db";
 import { decryptPayoutValue } from "../../lib/secure-data";
+import { affiliateProducts } from "../../lib/products";
 import AdminReviewActions from "../../components/admin-review-actions";
 import AdminPayoutAction from "../../components/admin-payout-action";
 import AdminUserForm from "../../components/admin-user-form";
 import AdminUserActions from "../../components/admin-user-actions";
 import AdminCommissionAction from "../../components/admin-commission-action";
+import AdminReferralDeleteAction from "../../components/admin-referral-delete-action";
 import BrandLogo from "../../components/brand-logo";
 
 const views = [
@@ -26,6 +28,10 @@ function formatDate(value, length = 10) {
   if (!value) return "—";
   const text = value instanceof Date ? value.toISOString() : String(value);
   return text.slice(0, length).replace("T", " ");
+}
+
+function productName(key) {
+  return affiliateProducts.find((product) => product.key === key)?.name || key;
 }
 
 async function AffiliateTable({ rows }) {
@@ -108,9 +114,14 @@ async function AffiliateTable({ rows }) {
                 <strong>Referral activity</strong>
                 {referrals.map((item) => (
                   <span key={item.product + item.created_at}>
-                    {item.product} · {item.referred_name || item.referred_company || "Customer identity pending"}{" "}
-                    {item.referred_name && item.referred_company ? `· ${item.referred_company} ` : ""}· {item.referred_email || "Email pending"} ·{" "}
-                    {item.status}
+                    {productName(item.product)} ·{" "}
+                    {item.referred_name ||
+                      item.referred_company ||
+                      "Customer identity pending"}{" "}
+                    {item.referred_name && item.referred_company
+                      ? `· ${item.referred_company} `
+                      : ""}
+                    · {item.referred_email || "Email pending"} · {item.status}
                     {item.subscription_expires_at
                       ? ` · Expires ${formatDate(item.subscription_expires_at)}`
                       : ""}
@@ -157,9 +168,20 @@ export default async function Admin({ searchParams }) {
   const activeCount = rows.filter((row) => row.status === "active").length;
   const referralRows = await db
     .prepare(
-      "SELECT r.product,r.referred_email,r.source,r.status,r.created_at,a.name AS affiliate FROM referrals r JOIN affiliates a ON a.id=r.affiliate_id ORDER BY r.id DESC LIMIT 200",
+      "SELECT r.id,r.affiliate_id,r.product,r.referred_name,r.referred_company,r.referred_email,r.source,r.status,r.subscription_expires_at,r.created_at,a.name AS affiliate,a.email AS affiliate_email FROM referrals r JOIN affiliates a ON a.id=r.affiliate_id ORDER BY a.name COLLATE NOCASE,r.id DESC LIMIT 500",
     )
     .all();
+  const referralGroups = referralRows.reduce((groups, row) => {
+    const key = String(row.affiliate_id);
+    const group = groups.get(key) || {
+      affiliate: row.affiliate,
+      email: row.affiliate_email,
+      referrals: [],
+    };
+    group.referrals.push(row);
+    groups.set(key, group);
+    return groups;
+  }, new Map());
   const payoutRows = await db
     .prepare(
       "SELECT p.id,p.amount,p.status,p.created_at,a.name AS affiliate,a.email,a.payout_bank_name,a.payout_account_number FROM payouts p JOIN affiliates a ON a.id=p.affiliate_id ORDER BY p.id DESC LIMIT 200",
@@ -283,97 +305,146 @@ export default async function Admin({ searchParams }) {
           )}
           {view === "affiliates" && <AffiliateTable rows={rows} />}
           {view === "referrals" && (
-            <section className="admin-list-card">
-              <div className="admin-list-heading">
-                <span>Affiliate</span>
-                <span>Product</span>
-                <span>Referred person</span>
-                <span>Source</span>
-                <span>Status</span>
-                <span>Date</span>
-              </div>
-              {referralRows.map((row, i) => (
-                <div
-                  className="admin-list-row"
-                  key={row.affiliate + row.product + row.created_at + i}
+            <div className="admin-referral-groups">
+              {[...referralGroups.entries()].map(([affiliateId, group]) => (
+                <section
+                  className="admin-list-card admin-referral-group"
+                  key={affiliateId}
                 >
-                  <span>{row.affiliate}</span>
-                  <span>{row.product}</span>
-                  <span>{row.referred_email || "Email unavailable"}</span>
-                  <span>{row.source}</span>
-                  <span>{row.status}</span>
-                  <span>{formatDate(row.created_at)}</span>
-                </div>
+                  <div className="admin-referral-group-heading">
+                    <div>
+                      <strong>{group.affiliate}</strong>
+                      <small>{group.email}</small>
+                    </div>
+                    <span>
+                      {group.referrals.length} referral
+                      {group.referrals.length === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <div className="admin-list-heading">
+                    <span>Product</span>
+                    <span>Referred person</span>
+                    <span>Source</span>
+                    <span>Status</span>
+                    <span>Date</span>
+                    <span>Action</span>
+                  </div>
+                  {group.referrals.map((row) => (
+                    <div className="admin-list-row" key={row.id}>
+                      <span>{productName(row.product)}</span>
+                      <span>
+                        {row.referred_name ||
+                          row.referred_company ||
+                          "Customer identity pending"}
+                        <small>
+                          {row.referred_email || "Email unavailable"}
+                          {row.referred_name && row.referred_company
+                            ? ` · ${row.referred_company}`
+                            : ""}
+                        </small>
+                      </span>
+                      <span>{row.source}</span>
+                      <span>
+                        {row.status}
+                        {row.subscription_expires_at
+                          ? ` · Expires ${formatDate(row.subscription_expires_at)}`
+                          : ""}
+                      </span>
+                      <span>{formatDate(row.created_at)}</span>
+                      <AdminReferralDeleteAction
+                        id={row.id}
+                        label={`${row.referred_name || row.referred_company || "this referral"} (${productName(row.product)})`}
+                      />
+                    </div>
+                  ))}
+                </section>
               ))}
-            </section>
+              {!referralGroups.size && (
+                <p className="admin-empty">
+                  No referrals have been captured yet.
+                </p>
+              )}
+            </div>
           )}
           {view === "commissions" && (
             <>
-            <p className="admin-workflow-note"><strong>Commission approval</strong> confirms that an earned commission is eligible for payout. It does not send money. Process approved payout requests separately from the <strong>Payouts</strong> section.</p>
-            <section className="admin-list-card">
-              <div className="admin-list-heading">
-                <span>Affiliate</span>
-                <span>Product</span>
-                <span>Amount</span>
-                <span>Status</span>
-                <span>Date</span>
-                <span>Action</span>
-              </div>
-              {commissionRows.map((row) => (
-                <div className="admin-list-row" key={row.id}>
-                  <span>
-                    <strong>{row.affiliate}</strong>
-                    <small>{row.email}</small>
-                  </span>
-                  <span>{row.product}</span>
-                  <span>₦{(row.amount / 100).toLocaleString()}</span>
-                  <span>{row.status}</span>
-                  <span>{formatDate(row.created_at)}</span>
-                  <span>
-                    <AdminCommissionAction id={row.id} status={row.status} />
-                  </span>
+              <p className="admin-workflow-note">
+                <strong>Commission approval</strong> confirms that an earned
+                commission is eligible for payout. It does not send money.
+                Process approved payout requests separately from the{" "}
+                <strong>Payouts</strong> section.
+              </p>
+              <section className="admin-list-card">
+                <div className="admin-list-heading">
+                  <span>Affiliate</span>
+                  <span>Product</span>
+                  <span>Amount</span>
+                  <span>Status</span>
+                  <span>Date</span>
+                  <span>Action</span>
                 </div>
-              ))}
-            </section>
+                {commissionRows.map((row) => (
+                  <div className="admin-list-row" key={row.id}>
+                    <span>
+                      <strong>{row.affiliate}</strong>
+                      <small>{row.email}</small>
+                    </span>
+                    <span>{productName(row.product)}</span>
+                    <span>₦{(row.amount / 100).toLocaleString()}</span>
+                    <span>{row.status}</span>
+                    <span>{formatDate(row.created_at)}</span>
+                    <span>
+                      <AdminCommissionAction id={row.id} status={row.status} />
+                    </span>
+                  </div>
+                ))}
+              </section>
             </>
           )}
           {view === "payouts" && (
             <>
-            <p className="admin-workflow-note"><strong>Payout processing</strong> is where money sent to an affiliate is recorded. Confirm the transfer, then choose <strong>Mark paid</strong>. This updates the affiliate’s paid total and payout history.</p>
-            <section className="admin-list-card">
-              <div className="admin-list-heading">
-                <span>Affiliate</span>
-                <span>Amount</span>
-                <span>Bank</span>
-                <span>Account</span>
-                <span>Status</span>
-                <span>Action</span>
-              </div>
-              {payoutRows.map((row) => (
-                <div className="admin-list-row" key={row.id}>
-                  <span>
-                    <strong>{row.affiliate}</strong>
-                    <small>{row.email}</small>
-                  </span>
-                  <span>₦{(row.amount / 100).toLocaleString()}</span>
-                  <span>
-                    {row.payout_bank_name
-                      ? decryptPayoutValue(row.payout_bank_name)
-                      : "Not provided"}
-                  </span>
-                  <span>
-                    {row.payout_account_number
-                      ? "••••" +
-                        decryptPayoutValue(row.payout_account_number).slice(-4)
-                      : "Not provided"}
-                  </span>
-                  <span>{row.status}</span>
-                  <span>
-                    <AdminPayoutAction id={row.id} status={row.status} />
-                  </span>
+              <p className="admin-workflow-note">
+                <strong>Payout processing</strong> is where money sent to an
+                affiliate is recorded. Confirm the transfer, then choose{" "}
+                <strong>Mark paid</strong>. This updates the affiliate’s paid
+                total and payout history.
+              </p>
+              <section className="admin-list-card">
+                <div className="admin-list-heading">
+                  <span>Affiliate</span>
+                  <span>Amount</span>
+                  <span>Bank</span>
+                  <span>Account</span>
+                  <span>Status</span>
+                  <span>Action</span>
                 </div>
-              ))}
-            </section>
+                {payoutRows.map((row) => (
+                  <div className="admin-list-row" key={row.id}>
+                    <span>
+                      <strong>{row.affiliate}</strong>
+                      <small>{row.email}</small>
+                    </span>
+                    <span>₦{(row.amount / 100).toLocaleString()}</span>
+                    <span>
+                      {row.payout_bank_name
+                        ? decryptPayoutValue(row.payout_bank_name)
+                        : "Not provided"}
+                    </span>
+                    <span>
+                      {row.payout_account_number
+                        ? "••••" +
+                          decryptPayoutValue(row.payout_account_number).slice(
+                            -4,
+                          )
+                        : "Not provided"}
+                    </span>
+                    <span>{row.status}</span>
+                    <span>
+                      <AdminPayoutAction id={row.id} status={row.status} />
+                    </span>
+                  </div>
+                ))}
+              </section>
             </>
           )}
           {view === "administrators" &&

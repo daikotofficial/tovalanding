@@ -15,7 +15,7 @@ export async function GET(req) {
     return failure("Administrator access required.", 403);
   const affiliateId = new URL(req.url).searchParams.get("affiliateId");
   if (affiliateId) {
-      const affiliate = await db
+    const affiliate = await db
       .prepare(
         "SELECT id,name,email,phone,location,channel,code,status,verified,created_at,payout_account_name,payout_account_number,payout_bank_name FROM affiliates WHERE id=?",
       )
@@ -68,8 +68,16 @@ export async function GET(req) {
 
 export async function POST(req) {
   let data;
-  try { data = await input(req); }
-  catch (error) { return failure(error.message === "ORIGIN" ? "Request origin not allowed." : "Invalid request.", error.message === "ORIGIN" ? 403 : 400); }
+  try {
+    data = await input(req);
+  } catch (error) {
+    return failure(
+      error.message === "ORIGIN"
+        ? "Request origin not allowed."
+        : "Invalid request.",
+      error.message === "ORIGIN" ? 403 : 400,
+    );
+  }
   const actor = await currentSuperadmin();
   if (!actor) return failure("Administrator access required.", 403);
   try {
@@ -109,20 +117,41 @@ export async function POST(req) {
           .get(status, payoutId);
         if (!updated) return null;
         if (status === "rejected")
-          await db.prepare("DELETE FROM payout_commissions WHERE payout_id=?").run(
-            payoutId,
+          await db
+            .prepare("DELETE FROM payout_commissions WHERE payout_id=?")
+            .run(payoutId);
+        await db
+          .prepare(
+            "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
+          )
+          .run(
+            actor.email,
+            data.action,
+            "payout",
+            String(payoutId),
+            "{}",
+            new Date().toISOString(),
           );
-        await db.prepare(
-          "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
-        ).run(
-          actor.email,
-          data.action,
-          "payout",
-          String(payoutId),
-          "{}",
-          new Date().toISOString(),
-        );
+        return updated;
       });
+      if (!finalized) return failure("That payout has already been finalized.");
+      const affiliate = await db
+        .prepare("SELECT name,email FROM affiliates WHERE id=?")
+        .get(finalized.affiliate_id);
+      if (affiliate?.email) {
+        const outcome =
+          status === "paid" ? "has been marked as paid" : "was rejected";
+        await sendMail({
+          to: affiliate.email,
+          subject: `Affiliate payout ${status}`,
+          text: `Hello ${affiliate.name}, your payout request of ₦${(finalized.amount / 100).toLocaleString()} ${outcome}. Please sign in to view the latest status.`,
+        }).catch((error) =>
+          console.error("Affiliate payout notification failed", {
+            payoutId,
+            error: error?.message,
+          }),
+        );
+      }
       return NextResponse.json({ ok: true, status });
     }
     if (["approve_commission", "reject_commission"].includes(data.action)) {
@@ -137,41 +166,79 @@ export async function POST(req) {
         return failure("That commission has already been finalized.");
       const status =
         data.action === "approve_commission" ? "approved" : "rejected";
-      await db.transaction(async () => {
-        await db.prepare(
-          "UPDATE commissions SET status=? WHERE id=? AND status='pending'",
-        ).run(status, commissionId);
-        await db.prepare(
-          "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
-        ).run(
-          actor.email,
-          data.action,
-          "commission",
-          String(commissionId),
-          JSON.stringify({ note }),
-          new Date().toISOString(),
-        );
-        return updated;
+      const updated = await db.transaction(async () => {
+        const result = await db
+          .prepare(
+            "UPDATE commissions SET status=? WHERE id=? AND status='pending'",
+          )
+          .run(status, commissionId);
+        if (!result.changes) return false;
+        await db
+          .prepare(
+            "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
+          )
+          .run(
+            actor.email,
+            data.action,
+            "commission",
+            String(commissionId),
+            JSON.stringify({ note }),
+            new Date().toISOString(),
+          );
+        return true;
       });
-      if (!finalized)
-        return failure("That payout has already been finalized.");
-      const affiliate = await db
-        .prepare("SELECT name,email FROM affiliates WHERE id=?")
-        .get(finalized.affiliate_id);
-      if (affiliate?.email) {
-        const outcome = status === "paid" ? "has been marked as paid" : "was rejected";
-        await sendMail({
-          to: affiliate.email,
-          subject: `Affiliate payout ${status}`,
-          text: `Hello ${affiliate.name}, your payout request of ₦${(finalized.amount / 100).toLocaleString()} ${outcome}. Please sign in to view the latest status.`,
-        }).catch((error) =>
-          console.error("Affiliate payout notification failed", {
-            payoutId,
-            error: error?.message,
-          }),
-        );
-      }
-      return NextResponse.json({ ok: true, status: finalized.status });
+      if (!updated)
+        return failure("That commission has already been finalized.");
+      return NextResponse.json({ ok: true, status });
+    }
+    if (data.action === "delete_referral") {
+      const referralId = Number(data.referralId);
+      if (!Number.isInteger(referralId) || referralId <= 0)
+        return failure("Invalid referral.");
+      const deleted = await db.transaction(async () => {
+        const referral = await db
+          .prepare(
+            "SELECT id,affiliate_id,product,external_id FROM referrals WHERE id=?",
+          )
+          .get(referralId);
+        if (!referral) return { error: "Referral not found.", status: 404 };
+        const reserved = await db
+          .prepare(
+            "SELECT COUNT(*) AS count FROM payout_commissions pc JOIN commissions c ON c.id=pc.commission_id WHERE c.referral_id=?",
+          )
+          .get(referralId);
+        if (Number(reserved.count) > 0)
+          return {
+            error:
+              "This referral has already been included in a payout and cannot be deleted.",
+            status: 409,
+          };
+        await db
+          .prepare("DELETE FROM commissions WHERE referral_id=?")
+          .run(referralId);
+        const result = await db
+          .prepare("DELETE FROM referrals WHERE id=? RETURNING id")
+          .get(referralId);
+        if (!result) return { error: "Referral was not deleted.", status: 409 };
+        await db
+          .prepare(
+            "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
+          )
+          .run(
+            actor.email,
+            "delete_referral",
+            "referral",
+            String(referralId),
+            JSON.stringify({
+              affiliateId: referral.affiliate_id,
+              product: referral.product,
+            }),
+            new Date().toISOString(),
+          );
+        return { ok: true };
+      });
+      if (deleted.error) return failure(deleted.error, deleted.status);
+      return NextResponse.json(deleted);
     }
     if (data.action === "create_admin") {
       if (actor.role !== "superadmin")
@@ -187,9 +254,18 @@ export async function POST(req) {
       try {
         const admin = await db.transaction(async () => {
           const created = await createAdminUser(email, password);
-          await db.prepare(
-          "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
-          ).run(actor.email, "create_admin", "admin", String(created.id), JSON.stringify({ email: created.email }), new Date().toISOString());
+          await db
+            .prepare(
+              "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
+            )
+            .run(
+              actor.email,
+              "create_admin",
+              "admin",
+              String(created.id),
+              JSON.stringify({ email: created.email }),
+              new Date().toISOString(),
+            );
           return created;
         });
         return NextResponse.json({ ok: true, admin });
@@ -220,22 +296,23 @@ export async function POST(req) {
         } else {
           const status =
             data.action === "deactivate_admin" ? "disabled" : "active";
-          await db.prepare("UPDATE admin_users SET status=? WHERE id=?").run(
-            status,
-            admin.id,
-          );
+          await db
+            .prepare("UPDATE admin_users SET status=? WHERE id=?")
+            .run(status, admin.id);
           if (status === "disabled") await revokeAdminSessions(admin.email);
         }
-        await db.prepare(
-          "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
-        ).run(
-          actor.email,
-          data.action,
-          "admin",
-          String(admin.id),
-          JSON.stringify({ email: admin.email, note }),
-          new Date().toISOString(),
-        );
+        await db
+          .prepare(
+            "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
+          )
+          .run(
+            actor.email,
+            data.action,
+            "admin",
+            String(admin.id),
+            JSON.stringify({ email: admin.email, note }),
+            new Date().toISOString(),
+          );
       });
       return NextResponse.json({
         ok: true,
@@ -254,7 +331,9 @@ export async function POST(req) {
       !["approve", "reject", "deactivate", "reactivate"].includes(action)
     )
       return failure("Invalid affiliate review action.");
-    const affiliate = await db.prepare("SELECT * FROM affiliates WHERE id=?").get(id);
+    const affiliate = await db
+      .prepare("SELECT * FROM affiliates WHERE id=?")
+      .get(id);
     if (!affiliate) return failure("Affiliate application not found.", 404);
     if (action === "approve" && !affiliate.verified)
       return failure("The affiliate must verify their email before approval.");
@@ -274,10 +353,21 @@ export async function POST(req) {
           "The affiliate must verify their email before reactivation.",
         );
       await db.transaction(async () => {
-        await db.prepare("UPDATE affiliates SET status=? WHERE id=?").run(status, id);
-        await db.prepare(
-        "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
-        ).run(actor.email, action, "affiliate", String(id), JSON.stringify({ note }), new Date().toISOString());
+        await db
+          .prepare("UPDATE affiliates SET status=? WHERE id=?")
+          .run(status, id);
+        await db
+          .prepare(
+            "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
+          )
+          .run(
+            actor.email,
+            action,
+            "affiliate",
+            String(id),
+            JSON.stringify({ note }),
+            new Date().toISOString(),
+          );
       });
       return NextResponse.json({ ok: true, status });
     }
@@ -286,12 +376,21 @@ export async function POST(req) {
       code = makeCode();
       try {
         await db.transaction(async () => {
-          await db.prepare(
-          "UPDATE affiliates SET status='active',code=? WHERE id=?",
-          ).run(code, id);
-          await db.prepare(
-          "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
-          ).run(actor.email, "approve", "affiliate", String(id), JSON.stringify({ code }), new Date().toISOString());
+          await db
+            .prepare("UPDATE affiliates SET status='active',code=? WHERE id=?")
+            .run(code, id);
+          await db
+            .prepare(
+              "INSERT INTO audit_logs(actor_email,action,target_type,target_id,metadata,created_at) VALUES(?,?,?,?,?,?)",
+            )
+            .run(
+              actor.email,
+              "approve",
+              "affiliate",
+              String(id),
+              JSON.stringify({ code }),
+              new Date().toISOString(),
+            );
         });
         break;
       } catch (error) {

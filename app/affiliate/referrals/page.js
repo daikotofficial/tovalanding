@@ -2,6 +2,11 @@ import { redirect } from "next/navigation";
 import { currentUser } from "../../../lib/auth";
 import db from "../../../lib/db";
 import AffiliatePortalShell from "../../../components/affiliate-portal-shell";
+import { affiliateProducts } from "../../../lib/products";
+
+function productName(key) {
+  return affiliateProducts.find((product) => product.key === key)?.name || key;
+}
 
 function date(value) {
   if (!value) return "—";
@@ -20,41 +25,56 @@ export default async function ReferralsPage() {
   if (!user) redirect("/affiliate/login");
   const referrals = await db
     .prepare(
-      "SELECT r.product,r.referred_name,r.referred_company,r.referred_email,r.status,r.created_at,r.subscription_expires_at,c.amount,c.status AS commission_status FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? ORDER BY r.id DESC",
+      "SELECT r.product,r.referred_name,r.referred_company,r.referred_email,r.status,r.created_at,r.subscription_expires_at,COALESCE(SUM(c.amount),0) AS amount,CASE WHEN SUM(CASE WHEN c.status='approved' THEN 1 ELSE 0 END)>0 THEN 'approved' WHEN COUNT(c.id)>0 THEN 'pending' ELSE NULL END AS commission_status FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? GROUP BY r.id ORDER BY r.id DESC",
     )
     .all(user.id);
   return (
-    <AffiliatePortalShell user={user} active="referrals" title="Your referrals.">
-          <section className="dash-panels single-panel">
-            <div>
-              <h2>Referral activity</h2>
-              {referrals.length ? (
-                referrals.map((r, i) => (
-                  <div className="referral-row" key={i}>
-                    <span>
-                      <strong>{r.referred_name || r.referred_company || "Customer identity pending"}{r.referred_name && r.referred_company ? ` · ${r.referred_company}` : ""}</strong>
-                      <small>
-                        {r.referred_email || "Email pending"} · Product: {r.product} · Joined {date(r.created_at)} · {r.subscription_expires_at ? `Expires ${date(r.subscription_expires_at)}` : "Expiry pending"}
-                      </small>
-                    </span>
-                    <span className={`status-pill ${r.status}`}>
-                      {r.status === "converted" ? "Subscribed" : "Signed up"}
-                    </span>
-                    <span>
-                      {r.amount
-                        ? `₦${(r.amount / 100).toLocaleString()} ${r.commission_status === "approved" ? "approved" : "pending"}`
-                        : "—"}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-state">
-                  <h3>No referrals yet</h3>
-                  <p>People who sign up through your links will appear here.</p>
-                </div>
-              )}
+    <AffiliatePortalShell
+      user={user}
+      active="referrals"
+      title="Your referrals."
+    >
+      <section className="dash-panels single-panel">
+        <div>
+          <h2>Referral activity</h2>
+          {referrals.length ? (
+            referrals.map((r, i) => (
+              <div className="referral-row" key={i}>
+                <span>
+                  <strong>
+                    {r.referred_name ||
+                      r.referred_company ||
+                      "Customer identity pending"}
+                    {r.referred_name && r.referred_company
+                      ? ` · ${r.referred_company}`
+                      : ""}
+                  </strong>
+                  <small>
+                    {r.referred_email || "Email pending"} · Product:{" "}
+                    {productName(r.product)} · Joined {date(r.created_at)} ·{" "}
+                    {r.subscription_expires_at
+                      ? `Expires ${date(r.subscription_expires_at)}`
+                      : "Expiry pending"}
+                  </small>
+                </span>
+                <span className={`status-pill ${r.status}`}>
+                  {r.status === "converted" ? "Subscribed" : "Signed up"}
+                </span>
+                <span>
+                  {r.amount
+                    ? `₦${(r.amount / 100).toLocaleString()} ${r.commission_status === "approved" ? "approved" : "pending"}`
+                    : "—"}
+                </span>
+              </div>
+            ))
+          ) : (
+            <div className="empty-state">
+              <h3>No referrals yet</h3>
+              <p>People who sign up through your links will appear here.</p>
             </div>
-          </section>
+          )}
+        </div>
+      </section>
     </AffiliatePortalShell>
   );
 }

@@ -23,12 +23,16 @@ function formatDate(value) {
   }).format(parsed);
 }
 
+function productName(key) {
+  return affiliateProducts.find((product) => product.key === key)?.name || key;
+}
+
 export default async function Dashboard() {
   const user = await currentUser();
   if (!user) redirect("/affiliate/login");
   const referrals = await db
     .prepare(
-      "SELECT r.product,r.referred_name,r.referred_company,r.referred_email,r.subscription_expires_at,r.status,r.created_at,c.amount AS commission,c.status AS commission_status FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? ORDER BY r.id DESC LIMIT 50",
+      "SELECT r.product,r.referred_name,r.referred_company,r.referred_email,r.subscription_expires_at,r.status,r.created_at,COALESCE(SUM(c.amount),0) AS commission,CASE WHEN SUM(CASE WHEN c.status='approved' THEN 1 ELSE 0 END)>0 THEN 'approved' WHEN COUNT(c.id)>0 THEN 'pending' ELSE NULL END AS commission_status FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? GROUP BY r.id ORDER BY r.id DESC LIMIT 50",
     )
     .all(user.id);
   const totals = await db
@@ -77,7 +81,12 @@ export default async function Dashboard() {
   if (user.status === "pending") {
     return (
       <>
-        <header className="app-header"><span className="logo"><span className="brand-wordmark">tova</span></span><AccountActions /></header>
+        <header className="app-header">
+          <span className="logo">
+            <span className="brand-wordmark">tova</span>
+          </span>
+          <AccountActions />
+        </header>
         <main className="review-page">
           <p className="eyebrow">AFFILIATE APPLICATION</p>
           <h1>Your application is under review.</h1>
@@ -100,96 +109,112 @@ export default async function Dashboard() {
     );
   }
   return (
-    <AffiliatePortalShell user={user} active="dashboard" eyebrow="AFFILIATE ACCOUNT" title={`Hello, ${user.name}.`}>
-          <ReferralCredentials
-            link={link}
-            code={user.code}
-            productLinks={productLinks}
-          />
-          <section className="dash-metrics">
-            <div>
-              <small>Referred signups</small>
-              <strong>{totals.registrations}</strong>
-              <span>Attributed to your account</span>
-            </div>
-            <div>
-              <small>Converted customers</small>
-              <strong>{totals.conversions || 0}</strong>
-              <span>Paid subscriptions</span>
-            </div>
-            <div>
-              <small>Total accrued</small>
-              <strong>₦{(earnings / 100).toLocaleString()}</strong>
-              <span>Pending and approved commission</span>
-            </div>
-            <div>
-              <small>Ready to withdraw</small>
-              <strong>₦{(available / 100).toLocaleString()}</strong>
-              <span>
-                {pending
-                  ? `₦${(pending / 100).toLocaleString()} pending`
-                  : "No payout requested"}
-              </span>
-            </div>
-            <div>
-              <small>Total paid out</small>
-              <strong>₦{(paidOut / 100).toLocaleString()}</strong>
-              <span>Successfully settled</span>
-            </div>
-          </section>
-          <section className="dash-panels">
-            <div>
-              <h2>Referral activity</h2>
-              {referrals.length ? (
-                referrals.map((r, i) => (
-                  <div className="referral-row" key={i}>
-                    <span>
-                      <strong>{r.product}</strong>
-                      <small>
-                        {r.referred_name || r.referred_company || "Customer identity pending"} {r.referred_name && r.referred_company ? `· ${r.referred_company}` : ""} · {r.referred_email || "Email pending"} · Product: {r.product} · Joined {formatDate(r.created_at)} · {r.subscription_expires_at ? `Expires ${formatDate(r.subscription_expires_at)}` : "Expiry pending"}
-                      </small>
-                    </span>
-                    <span className={`status-pill ${r.status}`}>
-                      {r.status === "converted" ? "Subscribed" : "Signed up"}
-                    </span>
-                    <span>
-                      {r.commission
-                        ? `₦${(r.commission / 100).toLocaleString()} ${r.commission_status === "approved" ? "approved" : "pending"}`
-                        : "—"}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <div className="empty-state">
-                  <h3>No attributed registrations yet</h3>
-                  <p>
-                    Confirmed registrations will appear here when product
-                    tracking is connected.
-                  </p>
-                </div>
-              )}
-            </div>
-            <div>
-              <h2>Payouts</h2>
-              <p className="fine">
-                You earn 20% on every qualifying paid subscription. Request a
-                payout anytime after your approved
-                balance reaches ₦50,000. Requests are reviewed and paid manually
-                within {PAYOUT_PROCESSING_DAYS} business days.
-              </p>
-              <div className="payout-line">
-                <span>Available balance</span>
-                <strong>₦{(available / 100).toLocaleString()}</strong>
+    <AffiliatePortalShell
+      user={user}
+      active="dashboard"
+      eyebrow="AFFILIATE ACCOUNT"
+      title={`Hello, ${user.name}.`}
+    >
+      <ReferralCredentials
+        link={link}
+        code={user.code}
+        productLinks={productLinks}
+      />
+      <section className="dash-metrics">
+        <div>
+          <small>Referred signups</small>
+          <strong>{totals.registrations}</strong>
+          <span>Attributed to your account</span>
+        </div>
+        <div>
+          <small>Converted customers</small>
+          <strong>{totals.conversions || 0}</strong>
+          <span>Paid subscriptions</span>
+        </div>
+        <div>
+          <small>Total accrued</small>
+          <strong>₦{(earnings / 100).toLocaleString()}</strong>
+          <span>Pending and approved commission</span>
+        </div>
+        <div>
+          <small>Ready to withdraw</small>
+          <strong>₦{(available / 100).toLocaleString()}</strong>
+          <span>
+            {pending
+              ? `₦${(pending / 100).toLocaleString()} pending`
+              : "No payout requested"}
+          </span>
+        </div>
+        <div>
+          <small>Total paid out</small>
+          <strong>₦{(paidOut / 100).toLocaleString()}</strong>
+          <span>Successfully settled</span>
+        </div>
+      </section>
+      <section className="dash-panels">
+        <div>
+          <h2>Referral activity</h2>
+          {referrals.length ? (
+            referrals.map((r, i) => (
+              <div className="referral-row" key={i}>
+                <span>
+                  <strong>{productName(r.product)}</strong>
+                  <small>
+                    {r.referred_name ||
+                      r.referred_company ||
+                      "Customer identity pending"}{" "}
+                    {r.referred_name && r.referred_company
+                      ? `· ${r.referred_company}`
+                      : ""}{" "}
+                    · {r.referred_email || "Email pending"} · Product:{" "}
+                    {productName(r.product)} · Joined {formatDate(r.created_at)}{" "}
+                    ·{" "}
+                    {r.subscription_expires_at
+                      ? `Expires ${formatDate(r.subscription_expires_at)}`
+                      : "Expiry pending"}
+                  </small>
+                </span>
+                <span className={`status-pill ${r.status}`}>
+                  {r.status === "converted" ? "Subscribed" : "Signed up"}
+                </span>
+                <span>
+                  {r.commission
+                    ? `₦${(r.commission / 100).toLocaleString()} ${r.commission_status === "approved" ? "approved" : "pending"}`
+                    : "—"}
+                </span>
               </div>
-              <PayoutAction disabled={available < PAYOUT_MINIMUM_MINOR} />
-              {payouts.map((p, i) => (
-                <p className="fine payout-history" key={i}>
-                  ₦{(p.amount / 100).toLocaleString()} · {p.status} ·{" "}
-                  {formatDate(p.created_at)}
-                </p>
-              ))}
+            ))
+          ) : (
+            <div className="empty-state">
+              <h3>No attributed registrations yet</h3>
+              <p>
+                Confirmed registrations will appear here when product tracking
+                is connected.
+              </p>
             </div>
-          </section>
+          )}
+        </div>
+        <div>
+          <h2>Payouts</h2>
+          <p className="fine">
+            You earn 20% on every qualifying paid subscription. Request a payout
+            anytime after your approved balance reaches ₦50,000. Requests are
+            reviewed and paid manually within {PAYOUT_PROCESSING_DAYS} business
+            days.
+          </p>
+          <div className="payout-line">
+            <span>Available balance</span>
+            <strong>₦{(available / 100).toLocaleString()}</strong>
+          </div>
+          <PayoutAction disabled={available < PAYOUT_MINIMUM_MINOR} />
+          {payouts.map((p, i) => (
+            <p className="fine payout-history" key={i}>
+              ₦{(p.amount / 100).toLocaleString()} · {p.status} ·{" "}
+              {formatDate(p.created_at)}
+            </p>
+          ))}
+        </div>
+      </section>
     </AffiliatePortalShell>
   );
 }
