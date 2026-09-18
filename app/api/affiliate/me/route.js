@@ -30,6 +30,20 @@ export async function GET() {
       )
       .get(user.id)
   ).amount;
+  const available = (
+    await db
+      .prepare(
+        "SELECT COALESCE(SUM(c.amount),0) AS amount FROM commissions c WHERE c.affiliate_id=? AND c.status='approved' AND c.id NOT IN (SELECT commission_id FROM payout_commissions)",
+      )
+      .get(user.id)
+  ).amount;
+  const pendingPayout = (
+    await db
+      .prepare(
+        "SELECT COALESCE(SUM(amount),0) AS amount FROM payouts WHERE affiliate_id=? AND status IN ('requested','approved')",
+      )
+      .get(user.id)
+  ).amount;
   return NextResponse.json(
     {
       user: {
@@ -37,6 +51,8 @@ export async function GET() {
         earnings,
         pending,
         paidOut,
+        available,
+        pendingPayout,
         referrals,
         referralLink:
           user.status === "active"

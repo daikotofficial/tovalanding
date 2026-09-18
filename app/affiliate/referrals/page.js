@@ -25,7 +25,7 @@ export default async function ReferralsPage() {
   if (!user) redirect("/affiliate/login");
   const referrals = await db
     .prepare(
-      "SELECT r.product,r.referred_name,r.referred_company,r.referred_email,r.status,r.created_at,r.subscription_expires_at,COALESCE(SUM(c.amount),0) AS amount,CASE WHEN SUM(CASE WHEN c.status='approved' THEN 1 ELSE 0 END)>0 THEN 'approved' WHEN COUNT(c.id)>0 THEN 'pending' ELSE NULL END AS commission_status FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? GROUP BY r.id ORDER BY r.id DESC",
+      "SELECT r.product,r.referred_name,r.referred_company,r.referred_email,r.status,r.created_at,r.subscription_expires_at,COALESCE(SUM(CASE WHEN c.status IN ('pending','approved') THEN c.amount ELSE 0 END),0) AS amount,CASE WHEN SUM(CASE WHEN c.status='approved' THEN 1 ELSE 0 END)>0 THEN 'approved' WHEN SUM(CASE WHEN c.status='pending' THEN 1 ELSE 0 END)>0 THEN 'pending' WHEN COUNT(c.id)>0 THEN 'rejected' ELSE NULL END AS commission_status FROM referrals r LEFT JOIN commissions c ON c.referral_id=r.id WHERE r.affiliate_id=? GROUP BY r.id ORDER BY r.id DESC",
     )
     .all(user.id);
   return (

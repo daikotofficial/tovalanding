@@ -31,10 +31,16 @@ export async function GET(req) {
         "SELECT id,amount,status,created_at FROM payouts WHERE affiliate_id=? ORDER BY id DESC",
       )
       .all(affiliate.id);
+    const balances = await db
+      .prepare(
+        "SELECT (SELECT COALESCE(SUM(amount),0) FROM commissions WHERE affiliate_id=? AND status IN ('pending','approved')) AS accrued,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=? AND c.status='approved' AND c.id NOT IN (SELECT commission_id FROM payout_commissions)) AS available,(SELECT COALESCE(SUM(amount),0) FROM payouts WHERE affiliate_id=? AND status IN ('requested','approved')) AS pending_payout,(SELECT COALESCE(SUM(amount),0) FROM payouts WHERE affiliate_id=? AND status='paid') AS paid_out",
+      )
+      .get(affiliate.id, affiliate.id, affiliate.id, affiliate.id);
     return NextResponse.json(
       {
         affiliate: {
           ...affiliate,
+          balances,
           code: affiliate.status === "active" ? affiliate.code : null,
           payout_account_name: decryptPayoutValue(
             affiliate.payout_account_name,
@@ -52,9 +58,9 @@ export async function GET(req) {
   }
   const affiliates = await db
     .prepare(
-      "SELECT id,name,email,location,code,status,created_at, (SELECT COALESCE(SUM(amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status=?) AS earnings FROM affiliates a ORDER BY id DESC LIMIT 100",
+      "SELECT id,name,email,location,code,status,created_at,(SELECT COALESCE(SUM(amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status IN ('pending','approved')) AS earnings,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status='approved' AND c.id NOT IN (SELECT commission_id FROM payout_commissions)) AS available_earnings,(SELECT COALESCE(SUM(amount),0) FROM payouts p WHERE p.affiliate_id=a.id AND p.status IN ('requested','approved')) AS pending_payout,(SELECT COALESCE(SUM(amount),0) FROM payouts p WHERE p.affiliate_id=a.id AND p.status='paid') AS paid_out FROM affiliates a ORDER BY id DESC LIMIT 100",
     )
-    .all("approved");
+    .all();
   return NextResponse.json(
     {
       affiliates: affiliates.map((affiliate) => ({

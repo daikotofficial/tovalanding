@@ -77,6 +77,12 @@ async function AffiliateTable({ rows }) {
           <span>
             {row.referrals}
             <small>₦{(row.earnings / 100).toLocaleString()} accrued</small>
+            <small>
+              ₦{(row.available_earnings / 100).toLocaleString()} available
+            </small>
+            <small>
+              ₦{(row.pending_payout / 100).toLocaleString()} pending payout
+            </small>
             <small>₦{(row.paid_out / 100).toLocaleString()} paid out</small>
           </span>
           <span>{row.status === "active" ? row.code : "Not issued"}</span>
@@ -134,6 +140,12 @@ async function AffiliateTable({ rows }) {
                   Total accrued: ₦{(row.earnings / 100).toLocaleString()}
                 </span>
                 <span>
+                  Available: ₦{(row.available_earnings / 100).toLocaleString()}
+                </span>
+                <span>
+                  Pending payout: ₦{(row.pending_payout / 100).toLocaleString()}
+                </span>
+                <span>
                   Total paid: ₦{(row.paid_out / 100).toLocaleString()}
                 </span>
                 {payouts.map((item) => (
@@ -161,7 +173,7 @@ export default async function Admin({ searchParams }) {
     : "overview";
   const rows = await db
     .prepare(
-      "SELECT id,name,email,phone,location,channel,code,status,verified,created_at,payout_account_name,payout_account_number,payout_bank_name,(SELECT COUNT(*) FROM referrals r WHERE r.affiliate_id=a.id) AS referrals,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status IN ('pending','approved')) AS earnings,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status='approved') AS approved_earnings,(SELECT COALESCE(SUM(p.amount),0) FROM payouts p WHERE p.affiliate_id=a.id AND p.status='paid') AS paid_out FROM affiliates a ORDER BY CASE WHEN status='pending' THEN 0 WHEN status='active' THEN 1 ELSE 2 END,id DESC LIMIT 200",
+      "SELECT id,name,email,phone,location,channel,code,status,verified,created_at,payout_account_name,payout_account_number,payout_bank_name,(SELECT COUNT(*) FROM referrals r WHERE r.affiliate_id=a.id) AS referrals,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status IN ('pending','approved')) AS earnings,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status='approved' AND c.id NOT IN (SELECT commission_id FROM payout_commissions)) AS available_earnings,(SELECT COALESCE(SUM(p.amount),0) FROM payouts p WHERE p.affiliate_id=a.id AND p.status IN ('requested','approved')) AS pending_payout,(SELECT COALESCE(SUM(p.amount),0) FROM payouts p WHERE p.affiliate_id=a.id AND p.status='paid') AS paid_out FROM affiliates a ORDER BY CASE WHEN status='pending' THEN 0 WHEN status='active' THEN 1 ELSE 2 END,id DESC LIMIT 200",
     )
     .all();
   const pendingCount = rows.filter((row) => row.status === "pending").length;
