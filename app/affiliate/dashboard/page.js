@@ -7,6 +7,13 @@ import BrandLogo from "../../../components/brand-logo";
 import PayoutAction from "../../../components/payout-action";
 import ReferralCredentials from "../../../components/referral-credentials";
 import { PAYOUT_MINIMUM_MINOR, PAYOUT_PROCESSING_DAYS } from "../../../lib/payout-policy";
+
+function formatDate(value) {
+  if (!value) return "—";
+  const text = value instanceof Date ? value.toISOString() : String(value);
+  return text.slice(0, 10);
+}
+
 export default async function Dashboard() {
   const user = await currentUser();
   if (!user) redirect("/affiliate/login");
@@ -116,7 +123,7 @@ export default async function Dashboard() {
             {referrals.length ? (
               referrals.map((r, i) => (
                 <div className="referral-row" key={i}>
-                  <span><strong>{r.product}</strong><small>{r.created_at.slice(0, 10)}</small></span>
+                  <span><strong>{r.product}</strong><small>{formatDate(r.created_at)}</small></span>
                   <span className={`status-pill ${r.status}`}>{r.status === "converted" ? "Subscribed" : "Signed up"}</span>
                   <span>{r.commission ? `₦${(r.commission / 100).toLocaleString()}` : "—"}</span>
                 </div>
@@ -136,7 +143,7 @@ export default async function Dashboard() {
             <p className="fine">You earn 10% of every qualifying paid subscription. Request a payout anytime after your approved balance reaches ₦50,000. Requests are reviewed and paid manually within {PAYOUT_PROCESSING_DAYS} business days.</p>
             <div className="payout-line"><span>Available balance</span><strong>₦{(available / 100).toLocaleString()}</strong></div>
             <PayoutAction disabled={available < PAYOUT_MINIMUM_MINOR} />
-            {payouts.map((p, i) => <p className="fine payout-history" key={i}>₦{(p.amount / 100).toLocaleString()} · {p.status} · {p.created_at.slice(0, 10)}</p>)}
+            {payouts.map((p, i) => <p className="fine payout-history" key={i}>₦{(p.amount / 100).toLocaleString()} · {p.status} · {formatDate(p.created_at)}</p>)}
           </div>
         </section>
         <footer className="dashboard-footer"><span>Affiliate program · 10% commission on qualifying subscriptions</span><Link href="/privacy">Privacy & terms</Link></footer>

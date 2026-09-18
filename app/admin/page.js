@@ -22,6 +22,12 @@ const views = [
   ["settings", "System settings", "⚙"],
 ];
 
+function formatDate(value, length = 10) {
+  if (!value) return "—";
+  const text = value instanceof Date ? value.toISOString() : String(value);
+  return text.slice(0, length).replace("T", " ");
+}
+
 async function AffiliateTable({ rows }) {
   const details = await Promise.all(
     rows.map(async (row) => ({
@@ -76,7 +82,7 @@ async function AffiliateTable({ rows }) {
                 <span>{row.email}</span>
                 <span>{row.phone || "No phone provided"}</span>
                 <span>{row.location || "No location"}</span>
-                <span>Applied {row.created_at.slice(0, 10)}</span>
+                <span>Applied {formatDate(row.created_at)}</span>
               </div>
               <div>
                 <strong>Bank details</strong>
@@ -112,7 +118,7 @@ async function AffiliateTable({ rows }) {
                   <span key={item.id}>
                     ₦{(item.amount / 100).toLocaleString()} ·{" "}
                     <AdminPayoutAction id={item.id} status={item.status} /> ·{" "}
-                    {item.created_at.slice(0, 10)}
+                    {formatDate(item.created_at)}
                   </span>
                 ))}
               </div>
@@ -283,7 +289,7 @@ export default async function Admin({ searchParams }) {
                   <span>{row.referred_email || "Email unavailable"}</span>
                   <span>{row.source}</span>
                   <span>{row.status}</span>
-                  <span>{row.created_at.slice(0, 10)}</span>
+                  <span>{formatDate(row.created_at)}</span>
                 </div>
               ))}
             </section>
@@ -307,7 +313,7 @@ export default async function Admin({ searchParams }) {
                   <span>{row.product}</span>
                   <span>₦{(row.amount / 100).toLocaleString()}</span>
                   <span>{row.status}</span>
-                  <span>{row.created_at.slice(0, 10)}</span>
+                  <span>{formatDate(row.created_at)}</span>
                   <span>
                     <AdminCommissionAction id={row.id} status={row.status} />
                   </span>
@@ -368,7 +374,7 @@ export default async function Admin({ searchParams }) {
                       <span>
                         <strong>{admin.email}</strong>
                         <em>
-                          {admin.status} · {admin.created_at.slice(0, 10)}
+                          {admin.status} · {formatDate(admin.created_at)}
                         </em>
                       </span>
                       <AdminUserActions id={admin.id} status={admin.status} />
@@ -399,7 +405,7 @@ export default async function Admin({ searchParams }) {
                   <span>
                     {row.target_type} · {row.target_id}
                   </span>
-                  <span>{row.created_at.slice(0, 16).replace("T", " ")}</span>
+                  <span>{formatDate(row.created_at, 16)}</span>
                 </div>
               ))}
             </section>
