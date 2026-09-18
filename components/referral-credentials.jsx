@@ -16,8 +16,8 @@ function EyeButton({ visible, onClick, label }) {
   );
 }
 
-export default function ReferralCredentials({ link, code }) {
-  const [visible, setVisible] = useState({ link: false, code: false });
+export default function ReferralCredentials({ link, code, productLinks = [] }) {
+  const [visible, setVisible] = useState({ link: false, code: false, products: false });
   const [copied, setCopied] = useState("");
 
   async function copy(value, name) {
@@ -64,6 +64,24 @@ export default function ReferralCredentials({ link, code }) {
           </button>
         </div>
       </div>
+      {productLinks.map((product) => (
+        <div className="credential-row" key={product.name}>
+          <div className="credential-copy">
+            <small>{product.name.toUpperCase()} SIGNUP LINK</small>
+            <strong>{visible.products ? product.link : "••••••••••••••••••••••••"}</strong>
+          </div>
+          <div className="credential-actions">
+            <EyeButton
+              visible={visible.products}
+              onClick={() => setVisible((old) => ({ ...old, products: !old.products }))}
+              label={`${product.name} signup link`}
+            />
+            <button className="credential-copy-button" type="button" onClick={() => copy(product.link, product.name)}>
+              {copied === product.name ? "Copied" : "Copy"}
+            </button>
+          </div>
+        </div>
+      ))}
       <p className="credential-note">Use the link for tracked visits, or enter the code during product signup.</p>
     </section>
   );

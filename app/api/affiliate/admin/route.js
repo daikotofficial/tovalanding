@@ -9,6 +9,7 @@ import {
   revokeAdminSessions,
 } from "../../../../lib/superadmin";
 import { decryptPayoutValue } from "../../../../lib/secure-data";
+import { affiliateProducts } from "../../../../lib/products";
 export async function GET(req) {
   if (!(await currentSuperadmin()))
     return failure("Administrator access required.", 403);
@@ -277,6 +278,12 @@ export async function POST(req) {
           throw error;
       }
     }
+    const productTextLinks = affiliateProducts
+      .map(
+        (product) =>
+          `${product.name}: ${process.env.APP_URL}/r/${encodeURIComponent(code)}?product=${product.key}`,
+      )
+      .join("\n");
     try {
       await sendMail({
         to: affiliate.email,
@@ -287,10 +294,8 @@ export async function POST(req) {
           affiliate.name +
           ". Your Tova affiliate application has been approved. Your referral code is " +
           code +
-          ". Your referral link is " +
-          process.env.APP_URL +
-          "/r/" +
-          code +
+          ". Your product signup links are:\n" +
+          productTextLinks +
           ". Sign in at " +
           process.env.APP_URL +
           "/affiliate/login to access your dashboard.",

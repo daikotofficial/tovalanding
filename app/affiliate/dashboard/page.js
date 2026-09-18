@@ -7,6 +7,7 @@ import BrandLogo from "../../../components/brand-logo";
 import PayoutAction from "../../../components/payout-action";
 import ReferralCredentials from "../../../components/referral-credentials";
 import { PAYOUT_MINIMUM_MINOR, PAYOUT_PROCESSING_DAYS } from "../../../lib/payout-policy";
+import { affiliateProducts } from "../../../lib/products";
 
 function formatDate(value) {
   if (!value) return "—";
@@ -46,6 +47,10 @@ export default async function Dashboard() {
     .prepare("SELECT amount,status,created_at FROM payouts WHERE affiliate_id=? ORDER BY id DESC LIMIT 5")
     .all(user.id);
   const link = process.env.APP_URL + "/r/" + user.code;
+  const productLinks = affiliateProducts.map((product) => ({
+    name: product.name,
+    link: `${process.env.APP_URL}/r/${encodeURIComponent(user.code)}?product=${product.key}`,
+  }));
   if (user.status === "pending") {
     return (
       <>
@@ -94,7 +99,7 @@ export default async function Dashboard() {
           <div className="dash-actions"><Link className="settings-link" href="/affiliate/settings">Settings</Link><AccountActions /></div>
         </div>
         <div className="dashboard-tabs"><Link className="active" href="/affiliate/dashboard">Overview</Link><Link href="/affiliate/settings">Payout settings</Link><span>Commission rate <strong>10%</strong></span></div>
-        <ReferralCredentials link={link} code={user.code} />
+        <ReferralCredentials link={link} code={user.code} productLinks={productLinks} />
         <section className="dash-metrics">
           <div>
             <small>Referred signups</small>

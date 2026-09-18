@@ -4,6 +4,7 @@ import Pricing from "../components/pricing";
 import MobileMenu from "../components/mobile-menu";
 import SiteFooter from "../components/site-footer";
 import BrandLogo from "../components/brand-logo";
+import { affiliateProduct, productSignupUrl } from "../lib/products";
 const areas = [
   ["Financial Management", "Accounting, valuation, and statutory reports"],
   ["Operational Workflows", "Requests, approvals, and execution tracking"],
@@ -18,18 +19,21 @@ const products = [
     "Track acquisition, custody, movement, depreciation, and disposal with clean audit visibility.",
     "Live",
     "https://tovafixedasset.com.ng",
+    "tovafixedasset",
   ],
   [
     "Accounting and Finance",
     "Consolidate spend, valuation, and reporting views for finance and compliance teams.",
     "Live",
     "https://tovabooks.com.ng",
+    "tovabooks",
   ],
   [
     "POS and Inventory",
     "Run sales operations with stock intelligence, SKU controls, and reorder workflows.",
     "Live",
     "https://tovapos.com.ng",
+    "tovapos",
   ],
   [
     "HR and Workforce",
@@ -69,6 +73,11 @@ export default async function Home() {
     const url = new URL(href);
     url.searchParams.set("ref", referralCode);
     return url.toString();
+  };
+  const addProductReferralCode = (href, productKey) => {
+    if (!referralCode) return href;
+    const product = affiliateProduct(productKey);
+    return product ? productSignupUrl(product, referralCode) : addReferralCode(href);
   };
   return (
     <>
@@ -244,11 +253,11 @@ export default async function Home() {
             that matches your current operating priority.
           </p>
           <div className="product-grid">
-            {products.map(([title, text, status, href]) =>
+            {products.map(([title, text, status, href, productKey]) =>
               status === "Live" ? (
                 <a
                   className="product"
-                  href={addReferralCode(href)}
+                  href={addProductReferralCode(href, productKey)}
                   key={title}
                   rel="noopener noreferrer"
                   target={href.startsWith("http") ? "_blank" : undefined}

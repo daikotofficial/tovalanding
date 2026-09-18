@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import db from "../../../lib/db";
+import { affiliateProduct, productSignupUrl } from "../../../lib/products";
 export async function GET(req, { params }) {
   const { code } = await params;
   const exists = await db
@@ -9,7 +10,12 @@ export async function GET(req, { params }) {
     .get(code);
   if (!exists)
     return new NextResponse("Referral code not found.", { status: 404 });
-  const response = NextResponse.redirect(new URL("/#products", process.env.APP_URL));
+  const productKey = new URL(req.url).searchParams.get("product");
+  const product = productKey ? affiliateProduct(productKey) : null;
+  const destination = product
+    ? productSignupUrl(product, code)
+    : new URL("/#products", process.env.APP_URL);
+  const response = NextResponse.redirect(destination);
   response.cookies.set("tova_referral", code, {
     httpOnly: true,
     sameSite: "lax",
