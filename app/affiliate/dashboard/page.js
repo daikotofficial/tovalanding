@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { currentUser } from "../../../lib/auth";
 import db from "../../../lib/db";
 import AccountActions from "../../../components/account-actions";
-import BrandLogo from "../../../components/brand-logo";
+import AffiliatePortalShell from "../../../components/affiliate-portal-shell";
 import PayoutAction from "../../../components/payout-action";
 import ReferralCredentials from "../../../components/referral-credentials";
 import {
@@ -14,8 +14,13 @@ import { affiliateProducts } from "../../../lib/products";
 
 function formatDate(value) {
   if (!value) return "—";
-  const text = value instanceof Date ? value.toISOString() : String(value);
-  return text.slice(0, 10);
+  const parsed = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-NG", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(parsed);
 }
 
 export default async function Dashboard() {
@@ -72,12 +77,7 @@ export default async function Dashboard() {
   if (user.status === "pending") {
     return (
       <>
-        <header className="app-header">
-          <Link className="logo" href="/">
-            <BrandLogo />
-          </Link>
-          <AccountActions />
-        </header>
+        <header className="app-header"><span className="logo"><span className="brand-wordmark">tova</span></span><AccountActions /></header>
         <main className="review-page">
           <p className="eyebrow">AFFILIATE APPLICATION</p>
           <h1>Your application is under review.</h1>
@@ -100,62 +100,7 @@ export default async function Dashboard() {
     );
   }
   return (
-    <>
-      <header className="app-header">
-        <Link className="logo" href="/">
-          <BrandLogo />
-        </Link>
-        <nav>
-          <Link href="/#products">Products</Link>
-        </nav>
-      </header>
-      <main className="dashboard-shell">
-        <aside className="dashboard-sidebar">
-          <Link className="logo" href="/">
-            <BrandLogo />
-          </Link>
-          <p className="sidebar-label">PARTNER PORTAL</p>
-          <nav className="sidebar-nav">
-            <Link className="active" href="/affiliate/dashboard">
-              <span>◈</span>Overview
-            </Link>
-            <Link href="/affiliate/referrals">
-              <span>↗</span>Referrals
-            </Link>
-            <Link href="/affiliate/payouts">
-              <span>₦</span>Earnings & payouts
-            </Link>
-            <Link href="/affiliate/settings">
-              <span>⚙</span>Settings
-            </Link>
-          </nav>
-          <div className="sidebar-bottom">
-            <p>Need help?</p>
-            <a href="mailto:support@tova.com.ng">Contact partner support →</a>
-          </div>
-        </aside>
-        <div className="dashboard-main">
-          <div className="dash-head">
-            <div>
-              <p className="eyebrow">AFFILIATE ACCOUNT</p>
-              <h1>Hello, {user.name}.</h1>
-            </div>
-            <div className="dash-actions">
-              <Link className="settings-link" href="/affiliate/settings">
-                Settings
-              </Link>
-              <AccountActions />
-            </div>
-          </div>
-          <div className="dashboard-tabs">
-            <Link className="active" href="/affiliate/dashboard">
-              Overview
-            </Link>
-            <Link href="/affiliate/settings">Payout settings</Link>
-            <span>
-              Commission rate <strong>20%</strong>
-            </span>
-          </div>
+    <AffiliatePortalShell user={user} active="dashboard" eyebrow="AFFILIATE ACCOUNT" title={`Hello, ${user.name}.`}>
           <ReferralCredentials
             link={link}
             code={user.code}
@@ -201,15 +146,7 @@ export default async function Dashboard() {
                     <span>
                       <strong>{r.product}</strong>
                       <small>
-                        {r.referred_name || "Referred customer"} ·{" "}
-                        {r.referred_email || "Email unavailable"} ·{" "}
-                        {formatDate(r.created_at)}
-                        {r.subscription_expires_at ? (
-                          <>
-                            {" "}
-                            · Expires {formatDate(r.subscription_expires_at)}
-                          </>
-                        ) : null}
+                        {r.referred_name || "Referred customer"} · {r.referred_email || "Email unavailable"} · Joined {formatDate(r.created_at)} · {r.subscription_expires_at ? `Expires ${formatDate(r.subscription_expires_at)}` : "Expiry pending"}
                       </small>
                     </span>
                     <span className={`status-pill ${r.status}`}>
@@ -253,12 +190,6 @@ export default async function Dashboard() {
               ))}
             </div>
           </section>
-          <footer className="dashboard-footer">
-            <span>Affiliate program · 20% commission after VAT exclusion</span>
-            <Link href="/privacy">Privacy & terms</Link>
-          </footer>
-        </div>
-      </main>
-    </>
+    </AffiliatePortalShell>
   );
 }

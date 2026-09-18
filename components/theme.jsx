@@ -1470,6 +1470,45 @@ footer div {flex-wrap:wrap;}
 .site-footer-column nav a {font-size:13px;line-height:1.45;}
 .site-footer-bottom {display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1320px;margin:58px auto 0;padding-top:22px;border-top:1px solid rgba(190,220,209,.18);color:#829795;font-size:10px;letter-spacing:.01em;}
 .site-footer-bottom span {color:#8fc8b2;text-transform:uppercase;letter-spacing:.18em;font-size:10px;}
+
+/* Authenticated affiliate portal: one calm navigation system, no competing
+   marketing header or duplicate page tabs. */
+.portal-shell {display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh;background:#f5f8f6;color:#07172f;}
+.portal-sidebar {display:flex;flex-direction:column;padding:34px 22px 24px;border-right:1px solid #dce8e1;background:#fff;}
+.portal-brand {padding:0 10px;height:46px;display:flex;align-items:center;pointer-events:none;}
+.portal-brand .brand-logo-crop {width:112px;height:42px;flex-basis:112px;}
+.portal-brand .brand-logo-image {width:112px;top:-33px;}
+.portal-sidebar .sidebar-label {margin:10px 10px 14px;}
+.portal-sidebar .sidebar-nav {gap:6px;}
+.portal-sidebar .sidebar-nav a {min-height:46px;padding:12px 13px;border-radius:10px;font-size:13px;}
+.portal-sidebar .sidebar-nav a span {font-size:14px;}
+.portal-content {min-width:0;width:100%;max-width:1500px;padding:48px clamp(24px,5vw,76px) 34px;}
+.portal-heading {display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding-bottom:30px;border-bottom:1px solid #d9e7df;}
+.portal-heading h1 {margin:6px 0 0;font-size:clamp(30px,3.1vw,46px);line-height:1.12;letter-spacing:-.055em;}
+.portal-actions {display:flex;align-items:center;gap:12px;flex:none;}
+.portal-actions .settings-link {font-size:13px;}
+.portal-content .referral-credentials {margin-top:28px;}
+.portal-content .dash-metrics {margin-top:28px;gap:12px;grid-template-columns:repeat(5,minmax(0,1fr));}
+.portal-content .dash-metrics > div {min-height:128px;padding:20px;background:#fff;border:1px solid #dce8e1;border-radius:12px;box-shadow:0 4px 16px rgba(23,61,47,.035);}
+.portal-content .dash-metrics strong {font-size:25px;}
+.portal-content .dash-panels {margin-top:28px;gap:18px;}
+.portal-content .dash-panels > div {background:#fff;border:1px solid #dce8e1;border-radius:14px;padding:24px;box-shadow:0 4px 16px rgba(23,61,47,.035);}
+.portal-content .dash-panels h2 {font-size:18px;letter-spacing:-.025em;}
+.portal-content .referral-row {display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:18px;align-items:center;padding:17px 0;border-bottom:1px solid #edf2ef;}
+.portal-content .referral-row:last-child {border-bottom:0;}
+.portal-content .referral-row strong {font-size:13px;color:#173d2f;}
+.portal-content .referral-row small {display:block;margin-top:5px;color:#71857c;font-size:11px;line-height:1.6;}
+.portal-content .status-pill {white-space:nowrap;border:1px solid #d8e7df;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:700;text-transform:capitalize;}
+.portal-content .status-pill.converted {background:#e7f8ef;border-color:#bfe8d2;color:#087b5c;}
+.portal-content .status-pill.registered {background:#fff8e7;border-color:#f1dfaa;color:#96701d;}
+.portal-settings-page {width:100%;max-width:840px;margin:28px 0 0;padding:0;}
+.portal-settings-page .settings-lead {margin:0 0 20px;color:#667b70;font-size:14px;}
+.portal-settings-page .settings-card {margin:14px 0;background:#fff;border:1px solid #dce8e1;border-radius:14px;box-shadow:0 4px 16px rgba(23,61,47,.035);}
+.portal-settings-page .settings-card h2 {font-size:17px;}
+.portal-content .dashboard-footer {display:flex;justify-content:space-between;gap:20px;margin-top:30px;padding-top:20px;border-top:1px solid #d9e7df;color:#91a097;font-size:11px;}
+.portal-content .dashboard-footer a {color:#688077;}
+@media(max-width:1050px){.portal-content .dash-metrics{grid-template-columns:repeat(3,minmax(0,1fr));}.portal-content .dash-panels{grid-template-columns:1fr;}}
+@media(max-width:760px){.portal-shell{display:block;}.portal-sidebar{display:block;padding:16px 18px;border-right:0;border-bottom:1px solid #dce8e1;}.portal-sidebar .sidebar-label{display:none;}.portal-sidebar .sidebar-nav{display:flex;overflow-x:auto;margin-top:0;padding-bottom:2px;scrollbar-width:none;}.portal-sidebar .sidebar-nav::-webkit-scrollbar{display:none;}.portal-sidebar .sidebar-nav a{flex:0 0 auto;min-height:40px;padding:9px 11px;font-size:12px;}.portal-sidebar .sidebar-bottom{display:none;}.portal-content{padding:28px 18px 24px;}.portal-heading{align-items:flex-start;flex-direction:column;padding-bottom:22px;}.portal-actions{width:100%;justify-content:flex-start;}.portal-content .dash-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}.portal-content .dash-metrics > div{min-height:112px;padding:15px;}.portal-content .dash-metrics strong{font-size:21px;}.portal-content .referral-row{grid-template-columns:1fr;gap:9px;}.portal-content .referral-row > span:last-child{font-weight:700;}.portal-content .dash-panels > div{padding:18px;overflow:hidden;}.portal-content .dashboard-footer{display:grid;line-height:1.6;}}
 /* Final shared type and layout scale. Keep all product, affiliate, and admin
    surfaces aligned instead of allowing legacy selectors to compete. */
 .header,.app-header {height:72px;min-height:72px;padding-left:max(24px,calc((100% - 1320px) / 2));padding-right:max(24px,calc((100% - 1320px) / 2));}

@@ -1,9 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "../../../lib/auth";
 import db from "../../../lib/db";
-import AccountActions from "../../../components/account-actions";
-import BrandLogo from "../../../components/brand-logo";
+import AffiliatePortalShell from "../../../components/affiliate-portal-shell";
 import PayoutAction from "../../../components/payout-action";
 import {
   PAYOUT_MINIMUM_MINOR,
@@ -47,61 +45,7 @@ export default async function PayoutsPage() {
     )
     .all(user.id);
   return (
-    <>
-      <header className="app-header">
-        <Link className="logo" href="/">
-          <BrandLogo />
-        </Link>
-        <nav>
-          <Link href="/affiliate/dashboard">Overview</Link>
-          <AccountActions />
-        </nav>
-      </header>
-      <main className="dashboard-shell">
-        <aside className="dashboard-sidebar">
-          <Link className="logo" href="/">
-            <BrandLogo />
-          </Link>
-          <p className="sidebar-label">PARTNER PORTAL</p>
-          <nav className="sidebar-nav">
-            <Link href="/affiliate/dashboard">
-              <span>◈</span>Overview
-            </Link>
-            <Link href="/affiliate/referrals">
-              <span>↗</span>Referrals
-            </Link>
-            <Link className="active" href="/affiliate/payouts">
-              <span>₦</span>Earnings & payouts
-            </Link>
-            <Link href="/affiliate/settings">
-              <span>⚙</span>Settings
-            </Link>
-          </nav>
-          <div className="sidebar-bottom">
-            <p>Need help?</p>
-            <a href="mailto:support@tova.com.ng">Contact partner support →</a>
-          </div>
-        </aside>
-        <div className="dashboard-main">
-          <div className="dash-head">
-            <div>
-              <p className="eyebrow">PARTNER PORTAL</p>
-              <h1>Earnings & payouts.</h1>
-            </div>
-            <div className="dash-actions">
-              <Link className="settings-link" href="/affiliate/settings">
-                Settings
-              </Link>
-              <AccountActions />
-            </div>
-          </div>
-          <div className="dashboard-tabs">
-            <Link href="/affiliate/dashboard">Overview</Link>
-            <Link href="/affiliate/referrals">Referrals</Link>
-            <Link className="active" href="/affiliate/payouts">
-              Earnings & payouts
-            </Link>
-          </div>
+    <AffiliatePortalShell user={user} active="payouts" title="Earnings & payouts.">
           <section className="dash-metrics">
             <div>
               <small>Total accrued</small>
@@ -144,8 +88,6 @@ export default async function PayoutsPage() {
               )}
             </div>
           </section>
-        </div>
-      </main>
-    </>
+    </AffiliatePortalShell>
   );
 }

@@ -1,12 +1,18 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "../../../lib/auth";
 import db from "../../../lib/db";
-import AccountActions from "../../../components/account-actions";
-import BrandLogo from "../../../components/brand-logo";
+import AffiliatePortalShell from "../../../components/affiliate-portal-shell";
 
 function date(value) {
-  return value ? String(value).slice(0, 10) : "—";
+  if (!value) return "—";
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime())
+    ? "—"
+    : new Intl.DateTimeFormat("en-NG", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }).format(parsed);
 }
 
 export default async function ReferralsPage() {
@@ -18,61 +24,7 @@ export default async function ReferralsPage() {
     )
     .all(user.id);
   return (
-    <>
-      <header className="app-header">
-        <Link className="logo" href="/">
-          <BrandLogo />
-        </Link>
-        <nav>
-          <Link href="/affiliate/dashboard">Overview</Link>
-          <AccountActions />
-        </nav>
-      </header>
-      <main className="dashboard-shell">
-        <aside className="dashboard-sidebar">
-          <Link className="logo" href="/">
-            <BrandLogo />
-          </Link>
-          <p className="sidebar-label">PARTNER PORTAL</p>
-          <nav className="sidebar-nav">
-            <Link href="/affiliate/dashboard">
-              <span>◈</span>Overview
-            </Link>
-            <Link className="active" href="/affiliate/referrals">
-              <span>↗</span>Referrals
-            </Link>
-            <Link href="/affiliate/payouts">
-              <span>₦</span>Earnings & payouts
-            </Link>
-            <Link href="/affiliate/settings">
-              <span>⚙</span>Settings
-            </Link>
-          </nav>
-          <div className="sidebar-bottom">
-            <p>Need help?</p>
-            <a href="mailto:support@tova.com.ng">Contact partner support →</a>
-          </div>
-        </aside>
-        <div className="dashboard-main">
-          <div className="dash-head">
-            <div>
-              <p className="eyebrow">PARTNER PORTAL</p>
-              <h1>Your referrals.</h1>
-            </div>
-            <div className="dash-actions">
-              <Link className="settings-link" href="/affiliate/settings">
-                Settings
-              </Link>
-              <AccountActions />
-            </div>
-          </div>
-          <div className="dashboard-tabs">
-            <Link href="/affiliate/dashboard">Overview</Link>
-            <Link className="active" href="/affiliate/referrals">
-              Referrals
-            </Link>
-            <Link href="/affiliate/payouts">Earnings & payouts</Link>
-          </div>
+    <AffiliatePortalShell user={user} active="referrals" title="Your referrals.">
           <section className="dash-panels single-panel">
             <div>
               <h2>Referral activity</h2>
@@ -82,11 +34,7 @@ export default async function ReferralsPage() {
                     <span>
                       <strong>{r.referred_name || "Referred customer"}</strong>
                       <small>
-                        {r.referred_email || "Email unavailable"} · {r.product}{" "}
-                        · Joined {date(r.created_at)}
-                        {r.subscription_expires_at
-                          ? ` · Expires ${date(r.subscription_expires_at)}`
-                          : ""}
+                        {r.referred_email || "Email unavailable"} · {r.product} · Joined {date(r.created_at)} · {r.subscription_expires_at ? `Expires ${date(r.subscription_expires_at)}` : "Expiry pending"}
                       </small>
                     </span>
                     <span className={`status-pill ${r.status}`}>
@@ -107,8 +55,6 @@ export default async function ReferralsPage() {
               )}
             </div>
           </section>
-        </div>
-      </main>
-    </>
+    </AffiliatePortalShell>
   );
 }
