@@ -25,11 +25,12 @@ use confirmed, unreversed commissions.
 4. The product stores the normalized code with the customer record.
 5. After the product creates the customer account, its server calls the signup
    endpoint with the product name and stable customer ID.
-6. Tova records the referral. It is visible in the affiliate dashboard, with no
+6. Tova records the referral, including the customer name when supplied. It is visible in the affiliate dashboard, with no
    earnings yet.
 7. After payment is verified by the product server, its server calls the
    subscription endpoint with the same product and stable customer ID, the paid
-   amount in minor units, and `NGN`.
+   amount in minor units, `NGN`, the customer name, and the subscription expiry
+   timestamp when available.
 8. Tova idempotently creates the 10% commission. Retries must reuse the same IDs.
 
 ## Security requirements

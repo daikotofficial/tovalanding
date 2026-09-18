@@ -10,7 +10,13 @@ import {
 export async function POST(req) {
   try {
     const data = await integrationBody(req);
-    if (!validProduct(data.product) || !validText(data.externalId, 160))
+    if (
+      !validProduct(data.product) ||
+      !validText(data.externalId, 160) ||
+      (data.customerName != null && !validText(data.customerName, 120)) ||
+      (data.subscriptionExpiresAt != null &&
+        !validText(data.subscriptionExpiresAt, 80))
+    )
       return NextResponse.json(
         { error: "product and externalId are required." },
         { status: 400 },
@@ -26,7 +32,9 @@ export async function POST(req) {
       {
         error: ["INVALID_AMOUNT", "INVALID_CURRENCY"].includes(error.message)
           ? "amountMinor must be a positive NGN integer."
-          : "Unable to record subscription.",
+          : error.message === "INVALID_EXPIRY"
+            ? "subscriptionExpiresAt must be a valid date."
+            : "Unable to record subscription.",
       },
       { status: 400 },
     );

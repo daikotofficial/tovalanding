@@ -8,13 +8,25 @@ if (!url) throw new Error("DATABASE_URL is required.");
 const pool = new Pool({
   connectionString: url,
   max: Number(process.env.DATABASE_POOL_MAX || 10),
-    ssl: process.env.DATABASE_SSL === "disable" ? false : { rejectUnauthorized: true },
+  ssl:
+    process.env.DATABASE_SSL === "disable"
+      ? false
+      : { rejectUnauthorized: true },
 });
 
 try {
-  const schema = await fs.readFile(new URL("../db/schema.sql", import.meta.url), "utf8");
+  const schema = await fs.readFile(
+    new URL("../db/schema.sql", import.meta.url),
+    "utf8",
+  );
   await pool.query("BEGIN");
   await pool.query(schema);
+  await pool.query(
+    "ALTER TABLE referrals ADD COLUMN IF NOT EXISTS referred_name TEXT",
+  );
+  await pool.query(
+    "ALTER TABLE referrals ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMPTZ",
+  );
   await pool.query("COMMIT");
   console.log("PostgreSQL schema is ready.");
 } catch (error) {

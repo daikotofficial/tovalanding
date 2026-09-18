@@ -72,11 +72,13 @@ CREATE TABLE IF NOT EXISTS referrals (
   affiliate_id BIGINT NOT NULL REFERENCES affiliates(id),
   product TEXT NOT NULL,
   external_id TEXT NOT NULL,
+  referred_name TEXT,
   referred_email TEXT,
   source TEXT NOT NULL DEFAULT 'link',
   status TEXT NOT NULL DEFAULT 'registered',
   signed_up_at TIMESTAMPTZ,
   converted_at TIMESTAMPTZ,
+  subscription_expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL,
   UNIQUE(product, external_id)
 );
