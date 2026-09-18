@@ -6,6 +6,10 @@ export default function AdminPayoutAction({ id, status }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   async function update(action) {
+    const prompt = action === "payout_paid"
+      ? "Confirm that this payout has been sent to the affiliate?"
+      : "Reject this payout request and release the reserved balance?";
+    if (!window.confirm(prompt)) return;
     setBusy(true);
     setMessage("");
     try {

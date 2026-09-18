@@ -83,7 +83,7 @@ export async function POST(req) {
         .get(payoutId);
       if (!payout) return failure("Payout not found.", 404);
       const current = await db
-        .prepare("SELECT status,affiliate_id FROM payouts WHERE id=?")
+        .prepare("SELECT status,affiliate_id,amount FROM payouts WHERE id=?")
         .get(payoutId);
       if (current.status !== "requested" && current.status !== "approved")
         return failure("That payout has already been finalized.");
@@ -101,11 +101,13 @@ export async function POST(req) {
           return failure("The affiliate must provide payout details first.");
       }
       const status = data.action === "payout_paid" ? "paid" : "rejected";
-      await db.transaction(async () => {
-        await db.prepare("UPDATE payouts SET status=? WHERE id=?").run(
-          status,
-          payoutId,
-        );
+      const finalized = await db.transaction(async () => {
+        const updated = await db
+          .prepare(
+            "UPDATE payouts SET status=? WHERE id=? AND status IN ('requested','approved') RETURNING id,status,affiliate_id,amount",
+          )
+          .get(status, payoutId);
+        if (!updated) return null;
         if (status === "rejected")
           await db.prepare("DELETE FROM payout_commissions WHERE payout_id=?").run(
             payoutId,
@@ -149,8 +151,27 @@ export async function POST(req) {
           JSON.stringify({ note }),
           new Date().toISOString(),
         );
+        return updated;
       });
-      return NextResponse.json({ ok: true, status });
+      if (!finalized)
+        return failure("That payout has already been finalized.");
+      const affiliate = await db
+        .prepare("SELECT name,email FROM affiliates WHERE id=?")
+        .get(finalized.affiliate_id);
+      if (affiliate?.email) {
+        const outcome = status === "paid" ? "has been marked as paid" : "was rejected";
+        await sendMail({
+          to: affiliate.email,
+          subject: `Affiliate payout ${status}`,
+          text: `Hello ${affiliate.name}, your payout request of ₦${(finalized.amount / 100).toLocaleString()} ${outcome}. Please sign in to view the latest status.`,
+        }).catch((error) =>
+          console.error("Affiliate payout notification failed", {
+            payoutId,
+            error: error?.message,
+          }),
+        );
+      }
+      return NextResponse.json({ ok: true, status: finalized.status });
     }
     if (data.action === "create_admin") {
       if (actor.role !== "superadmin")

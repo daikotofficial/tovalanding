@@ -14,6 +14,9 @@ function money(value) {
 function date(value) {
   return value ? String(value).slice(0, 10) : "—";
 }
+function statusLabel(value) {
+  return String(value || "").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
 
 export default async function PayoutsPage() {
   const user = await currentUser();
@@ -80,7 +83,7 @@ export default async function PayoutsPage() {
               {payouts.length ? (
                 payouts.map((p, i) => (
                   <p className="fine payout-history" key={i}>
-                    {money(p.amount)} · {p.status} · {date(p.created_at)}
+                    {money(p.amount)} · {statusLabel(p.status)} · {date(p.created_at)}
                   </p>
                 ))
               ) : (
