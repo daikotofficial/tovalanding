@@ -180,7 +180,7 @@ export default async function Admin({ searchParams }) {
   const activeCount = rows.filter((row) => row.status === "active").length;
   const referralRows = await db
     .prepare(
-      "SELECT r.id,r.affiliate_id,r.product,r.referred_name,r.referred_company,r.referred_email,r.source,r.status,r.subscription_expires_at,r.created_at,a.name AS affiliate,a.email AS affiliate_email FROM referrals r JOIN affiliates a ON a.id=r.affiliate_id ORDER BY a.name COLLATE NOCASE,r.id DESC LIMIT 500",
+      "SELECT r.id,r.affiliate_id,r.product,r.referred_name,r.referred_company,r.referred_email,r.source,r.status,r.subscription_expires_at,r.created_at,a.name AS affiliate,a.email AS affiliate_email FROM referrals r JOIN affiliates a ON a.id=r.affiliate_id ORDER BY LOWER(a.name),r.id DESC LIMIT 500",
     )
     .all();
   const referralGroups = referralRows.reduce((groups, row) => {
