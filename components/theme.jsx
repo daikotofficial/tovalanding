@@ -1493,6 +1493,8 @@ footer div {flex-wrap:wrap;}
 .portal-content .dash-metrics {margin-top:28px;gap:12px;grid-template-columns:repeat(5,minmax(0,1fr));}
 .portal-content .dash-metrics > div {min-height:128px;padding:20px;background:#fff;border:1px solid #dce8e1;border-radius:12px;box-shadow:0 4px 16px rgba(23,61,47,.035);}
 .portal-content .dash-metrics strong {font-size:25px;}
+.portal-content .dash-metrics small {color:#527166;font-size:11px;font-weight:700;letter-spacing:.06em;}
+.portal-content .dash-metrics strong {color:#07172f;font-variant-numeric:tabular-nums;}
 .portal-content .dash-panels {margin-top:28px;gap:18px;}
 .portal-content .dash-panels > div {background:#fff;border:1px solid #dce8e1;border-radius:14px;padding:24px;box-shadow:0 4px 16px rgba(23,61,47,.035);}
 .portal-content .dash-panels h2 {font-size:18px;letter-spacing:-.025em;}
@@ -1509,6 +1511,8 @@ footer div {flex-wrap:wrap;}
 .portal-settings-page .settings-card h2 {font-size:17px;}
 .portal-content .dashboard-footer {display:flex;justify-content:space-between;gap:20px;margin-top:30px;padding-top:20px;border-top:1px solid #d9e7df;color:#91a097;font-size:11px;}
 .portal-content .dashboard-footer a {color:#688077;}
+.admin-workflow-note {margin:0 0 16px;padding:15px 18px;border:1px solid #cfe3d8;border-left:4px solid #15966d;border-radius:8px;background:#f2faf5;color:#587067;font-size:13px;line-height:1.6;}
+.admin-workflow-note strong {color:#173d2f;}
 @media(max-width:1050px){.portal-content .dash-metrics{grid-template-columns:repeat(3,minmax(0,1fr));}.portal-content .dash-panels{grid-template-columns:1fr;}}
 @media(max-width:760px){.portal-shell{display:block;}.portal-sidebar{display:block;padding:16px 18px;border-right:0;border-bottom:1px solid #dce8e1;}.portal-sidebar .sidebar-label{display:none;}.portal-sidebar .sidebar-nav{display:flex;overflow-x:auto;margin-top:0;padding-bottom:2px;scrollbar-width:none;}.portal-sidebar .sidebar-nav::-webkit-scrollbar{display:none;}.portal-sidebar .sidebar-nav a{flex:0 0 auto;min-height:40px;padding:9px 11px;font-size:12px;}.portal-sidebar .sidebar-bottom{display:none;}.portal-content{padding:28px 18px 24px;}.portal-heading{align-items:flex-start;flex-direction:column;padding-bottom:22px;}.portal-actions{width:100%;justify-content:flex-start;}.portal-content .dash-metrics{grid-template-columns:repeat(2,minmax(0,1fr));}.portal-content .dash-metrics > div{min-height:112px;padding:15px;}.portal-content .dash-metrics strong{font-size:21px;}.portal-content .referral-row{grid-template-columns:1fr;gap:9px;}.portal-content .referral-row > span:last-child{font-weight:700;}.portal-content .dash-panels > div{padding:18px;overflow:hidden;}.portal-content .dashboard-footer{display:grid;line-height:1.6;}}
 /* Final shared type and layout scale. Keep all product, affiliate, and admin

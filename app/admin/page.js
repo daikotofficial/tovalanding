@@ -308,6 +308,8 @@ export default async function Admin({ searchParams }) {
             </section>
           )}
           {view === "commissions" && (
+            <>
+            <p className="admin-workflow-note"><strong>Commission approval</strong> confirms that an earned commission is eligible for payout. It does not send money. Process approved payout requests separately from the <strong>Payouts</strong> section.</p>
             <section className="admin-list-card">
               <div className="admin-list-heading">
                 <span>Affiliate</span>
@@ -333,8 +335,11 @@ export default async function Admin({ searchParams }) {
                 </div>
               ))}
             </section>
+            </>
           )}
           {view === "payouts" && (
+            <>
+            <p className="admin-workflow-note"><strong>Payout processing</strong> is where money sent to an affiliate is recorded. Confirm the transfer, then choose <strong>Mark paid</strong>. This updates the affiliate’s paid total and payout history.</p>
             <section className="admin-list-card">
               <div className="admin-list-heading">
                 <span>Affiliate</span>
@@ -369,6 +374,7 @@ export default async function Admin({ searchParams }) {
                 </div>
               ))}
             </section>
+            </>
           )}
           {view === "administrators" &&
             (actor.role === "superadmin" ? (
