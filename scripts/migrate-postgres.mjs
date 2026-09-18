@@ -27,6 +27,9 @@ try {
   await pool.query(
     "ALTER TABLE referrals ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMPTZ",
   );
+  await pool.query(
+    "UPDATE commissions c SET amount=ROUND(c.amount * 200.0 / 107.5), rate=20 WHERE c.rate=10 AND NOT EXISTS (SELECT 1 FROM payout_commissions pc WHERE pc.commission_id=c.id)",
+  );
   await pool.query("COMMIT");
   console.log("PostgreSQL schema is ready.");
 } catch (error) {

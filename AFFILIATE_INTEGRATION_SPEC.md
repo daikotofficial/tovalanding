@@ -8,8 +8,9 @@ account. The referral may appear in the affiliate dashboard immediately, but it
 must not create earnings yet.
 
 Only after the product has verified a successful paid subscription server-side does
-Tova create the commission: 10% of the qualifying subscription amount in NGN minor
-units. The product must never calculate or store the commission.
+Tova creates the commission at 20% of the qualifying subscription amount after
+removing the inclusive 7.5% VAT in NGN minor units. The product must never
+calculate or store the commission.
 
 Refunds, chargebacks, cancellations, suspected self-referrals, and other billing
 reversals must suspend or reverse the commission before payout. Payouts must only
@@ -31,7 +32,7 @@ use confirmed, unreversed commissions.
    subscription endpoint with the same product and stable customer ID, the paid
    amount in minor units, `NGN`, the customer name, and the subscription expiry
    timestamp when available.
-8. Tova idempotently creates the 10% commission. Retries must reuse the same IDs.
+8. Tova idempotently creates the 20% post-VAT commission. Retries must reuse the same IDs.
 
 ## Security requirements
 

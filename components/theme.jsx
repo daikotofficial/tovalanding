@@ -915,6 +915,8 @@ footer small {
 .settings-icon {display:grid;place-items:center;flex:none;width:35px;height:35px;border-radius:9px;background:#d9f4e5;color:#07865f;font-weight:700;}
 .settings-intro strong {font-size:12px;}.settings-intro p {font-size:11px;color:#698077;margin:2px 0 0;line-height:1.5;}
 .settings-form {display:grid;gap:16px;}.settings-form label {font-size:11px;font-weight:700;color:#45586c;}.settings-form input {display:block;width:100%;margin-top:7px;padding:12px;border:1px solid #c9d9d1;border-radius:4px;background:#fcfefd;font:12px Poppins;outline:none;}.settings-form input:focus {border-color:#07996e;box-shadow:0 0 0 3px rgba(7,153,110,.1);}.form-status {font-size:11px;color:#087b5c;background:#edf8f3;padding:10px;margin:0;}.profile-grid {display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}.profile-grid span {padding:14px;border:1px solid #e4ede8;border-radius:8px;}.profile-grid small,.profile-grid strong {display:block;}.profile-grid small {font-size:9px;color:#819089;margin-bottom:5px;}.profile-grid strong {font-size:12px;overflow-wrap:anywhere;}
+.settings-form input:disabled {background:#edf2ef;color:#819089;cursor:not-allowed;}
+.settings-cancel {border:0;background:transparent;color:#6b7d73;font:600 11px Poppins;cursor:pointer;}
 @media (max-width: 760px) {
   .dashboard-shell {display:block;}
   .dashboard-sidebar {display:block;padding:18px 20px;border-right:0;border-bottom:1px solid #dfeae4;}

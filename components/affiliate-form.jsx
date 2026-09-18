@@ -59,7 +59,10 @@ export default function AffiliateForm({ signup = false }) {
     } else if (signup) {
       if (await request("/api/affiliate/register", form)) {
         setStep("verify");
-        push("Verification code sent. Check your email to continue.", "success");
+        push(
+          "Verification code sent. Check your email to continue.",
+          "success",
+        );
       }
     } else {
       if (await request("/api/affiliate/login", form))
@@ -195,8 +198,8 @@ export default function AffiliateForm({ signup = false }) {
                 </label>
                 <p className="form-help">
                   Read our <Link href="/privacy">privacy policy</Link>.
-                  Affiliates earn 10% of qualifying paid subscriptions. Payouts
-                  are reviewed by the Tova team.
+                  Affiliates earn 20% of the VAT-exclusive value of qualifying
+                  paid subscriptions. Payouts are reviewed by the Tova team.
                 </p>
               </>
             )}

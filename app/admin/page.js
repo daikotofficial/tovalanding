@@ -34,7 +34,7 @@ async function AffiliateTable({ rows }) {
       row,
       referrals: await db
         .prepare(
-          "SELECT product,referred_email,source,status,created_at FROM referrals WHERE affiliate_id=? ORDER BY id DESC LIMIT 10",
+          "SELECT product,referred_name,referred_email,source,status,subscription_expires_at,created_at FROM referrals WHERE affiliate_id=? ORDER BY id DESC LIMIT 10",
         )
         .all(row.id),
       payouts: await db
@@ -70,7 +70,8 @@ async function AffiliateTable({ rows }) {
           <span>{row.location || "Not provided"}</span>
           <span>
             {row.referrals}
-            <small>₦{(row.earnings / 100).toLocaleString()} earned</small>
+            <small>₦{(row.earnings / 100).toLocaleString()} accrued</small>
+            <small>₦{(row.paid_out / 100).toLocaleString()} paid out</small>
           </span>
           <span>{row.status === "active" ? row.code : "Not issued"}</span>
           <AdminReviewActions id={row.id} status={row.status} />
@@ -107,13 +108,23 @@ async function AffiliateTable({ rows }) {
                 <strong>Referral activity</strong>
                 {referrals.map((item) => (
                   <span key={item.product + item.created_at}>
-                    {item.product} ·{" "}
-                    {item.referred_email || "Email unavailable"} · {item.status}
+                    {item.product} · {item.referred_name || "Referred customer"}{" "}
+                    · {item.referred_email || "Email unavailable"} ·{" "}
+                    {item.status}
+                    {item.subscription_expires_at
+                      ? ` · Expires ${formatDate(item.subscription_expires_at)}`
+                      : ""}
                   </span>
                 ))}
               </div>
               <div>
                 <strong>Payout history</strong>
+                <span>
+                  Total accrued: ₦{(row.earnings / 100).toLocaleString()}
+                </span>
+                <span>
+                  Total paid: ₦{(row.paid_out / 100).toLocaleString()}
+                </span>
                 {payouts.map((item) => (
                   <span key={item.id}>
                     ₦{(item.amount / 100).toLocaleString()} ·{" "}
@@ -139,7 +150,7 @@ export default async function Admin({ searchParams }) {
     : "overview";
   const rows = await db
     .prepare(
-      "SELECT id,name,email,phone,location,channel,code,status,verified,created_at,payout_account_name,payout_account_number,payout_bank_name,(SELECT COUNT(*) FROM referrals r WHERE r.affiliate_id=a.id) AS referrals,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status='approved') AS earnings FROM affiliates a ORDER BY CASE WHEN status='pending' THEN 0 WHEN status='active' THEN 1 ELSE 2 END,id DESC LIMIT 200",
+      "SELECT id,name,email,phone,location,channel,code,status,verified,created_at,payout_account_name,payout_account_number,payout_bank_name,(SELECT COUNT(*) FROM referrals r WHERE r.affiliate_id=a.id) AS referrals,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status IN ('pending','approved')) AS earnings,(SELECT COALESCE(SUM(c.amount),0) FROM commissions c WHERE c.affiliate_id=a.id AND c.status='approved') AS approved_earnings,(SELECT COALESCE(SUM(p.amount),0) FROM payouts p WHERE p.affiliate_id=a.id AND p.status='paid') AS paid_out FROM affiliates a ORDER BY CASE WHEN status='pending' THEN 0 WHEN status='active' THEN 1 ELSE 2 END,id DESC LIMIT 200",
     )
     .all();
   const pendingCount = rows.filter((row) => row.status === "pending").length;
@@ -176,7 +187,9 @@ export default async function Admin({ searchParams }) {
   return (
     <>
       <header className="app-header admin-topbar">
-          <Link className="logo" href="/"><BrandLogo /></Link>
+        <Link className="logo" href="/">
+          <BrandLogo />
+        </Link>
         <div className="admin-header-actions">
           <span>
             {actor.role === "superadmin" ? "Superadmin" : "Administrator"}

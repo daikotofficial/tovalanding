@@ -77,7 +77,7 @@ running development preview. `npm run start` serves that production build.
 The application persists affiliate applications and supports verified login, admin
 approval, referral links, signup attribution, subscription commissions, and payout
 requests. Verification does not approve an affiliate. Referral access is issued only
-after an administrator approves the application. The current program rate is 10% of a
+after an administrator approves the application. The current program rate is 20% of the VAT-exclusive value of a
 qualifying paid subscription. Subscription events enter a pending state and must be
 approved after billing checks. Amounts are sent and stored as integer minor units (for
 NGN, kobo).

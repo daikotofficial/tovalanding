@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS commissions (
   affiliate_id BIGINT NOT NULL REFERENCES affiliates(id),
   referral_id BIGINT NOT NULL REFERENCES referrals(id),
   amount BIGINT NOT NULL CHECK (amount > 0),
-  rate INTEGER NOT NULL DEFAULT 10,
+  rate INTEGER NOT NULL DEFAULT 20,
   currency TEXT NOT NULL DEFAULT 'NGN',
   status TEXT NOT NULL DEFAULT 'pending',
   created_at TIMESTAMPTZ NOT NULL,

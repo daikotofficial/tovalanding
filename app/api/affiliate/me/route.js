@@ -9,21 +9,27 @@ export async function GET() {
       "SELECT product,status,created_at FROM referrals WHERE affiliate_id=? ORDER BY id DESC LIMIT 50",
     )
     .all(user.id);
-  const earnings = (await db
-    .prepare(
-      "SELECT COALESCE(SUM(amount),0) AS amount FROM commissions WHERE affiliate_id=? AND status='approved'",
-    )
-    .get(user.id)).amount;
-  const pending = (await db
-    .prepare(
-      "SELECT COALESCE(SUM(amount),0) AS amount FROM commissions WHERE affiliate_id=? AND status='pending'",
-    )
-    .get(user.id)).amount;
-  const paidOut = (await db
-    .prepare(
-      "SELECT COALESCE(SUM(amount),0) AS amount FROM payouts WHERE affiliate_id=? AND status IN ('requested','approved','paid')",
-    )
-    .get(user.id)).amount;
+  const earnings = (
+    await db
+      .prepare(
+        "SELECT COALESCE(SUM(amount),0) AS amount FROM commissions WHERE affiliate_id=? AND status IN ('pending','approved')",
+      )
+      .get(user.id)
+  ).amount;
+  const pending = (
+    await db
+      .prepare(
+        "SELECT COALESCE(SUM(amount),0) AS amount FROM commissions WHERE affiliate_id=? AND status='pending'",
+      )
+      .get(user.id)
+  ).amount;
+  const paidOut = (
+    await db
+      .prepare(
+        "SELECT COALESCE(SUM(amount),0) AS amount FROM payouts WHERE affiliate_id=? AND status='paid'",
+      )
+      .get(user.id)
+  ).amount;
   return NextResponse.json(
     {
       user: {
@@ -32,7 +38,10 @@ export async function GET() {
         pending,
         paidOut,
         referrals,
-        referralLink: user.status === "active" ? process.env.APP_URL + "/r/" + encodeURIComponent(user.code) : null,
+        referralLink:
+          user.status === "active"
+            ? process.env.APP_URL + "/r/" + encodeURIComponent(user.code)
+            : null,
         referralCode: user.status === "active" ? user.code : null,
       },
     },

@@ -45,6 +45,13 @@ export default async function Dashboard() {
       )
       .get(user.id)
   ).amount;
+  const paidOut = (
+    await db
+      .prepare(
+        "SELECT COALESCE(SUM(amount),0) AS amount FROM payouts WHERE affiliate_id=? AND status='paid'",
+      )
+      .get(user.id)
+  ).amount;
   const available = (
     await db
       .prepare(
@@ -112,12 +119,12 @@ export default async function Dashboard() {
             <Link className="active" href="/affiliate/dashboard">
               <span>◈</span>Overview
             </Link>
-            <a href="#referrals">
+            <Link href="/affiliate/referrals">
               <span>↗</span>Referrals
-            </a>
-            <a href="#payouts">
+            </Link>
+            <Link href="/affiliate/payouts">
               <span>₦</span>Earnings & payouts
-            </a>
+            </Link>
             <Link href="/affiliate/settings">
               <span>⚙</span>Settings
             </Link>
@@ -146,7 +153,7 @@ export default async function Dashboard() {
             </Link>
             <Link href="/affiliate/settings">Payout settings</Link>
             <span>
-              Commission rate <strong>10%</strong>
+              Commission rate <strong>20%</strong>
             </span>
           </div>
           <ReferralCredentials
@@ -179,9 +186,14 @@ export default async function Dashboard() {
                   : "No payout requested"}
               </span>
             </div>
+            <div>
+              <small>Total paid out</small>
+              <strong>₦{(paidOut / 100).toLocaleString()}</strong>
+              <span>Successfully settled</span>
+            </div>
           </section>
           <section className="dash-panels">
-            <div id="referrals">
+            <div>
               <h2>Referral activity</h2>
               {referrals.length ? (
                 referrals.map((r, i) => (
@@ -220,13 +232,13 @@ export default async function Dashboard() {
                 </div>
               )}
             </div>
-            <div id="payouts">
+            <div>
               <h2>Payouts</h2>
               <p className="fine">
-                You earn 10% of every qualifying paid subscription. Request a
-                payout anytime after your approved balance reaches ₦50,000.
-                Requests are reviewed and paid manually within{" "}
-                {PAYOUT_PROCESSING_DAYS} business days.
+                You earn 20% of the VAT-exclusive value of every qualifying paid
+                subscription. Request a payout anytime after your approved
+                balance reaches ₦50,000. Requests are reviewed and paid manually
+                within {PAYOUT_PROCESSING_DAYS} business days.
               </p>
               <div className="payout-line">
                 <span>Available balance</span>
@@ -242,9 +254,7 @@ export default async function Dashboard() {
             </div>
           </section>
           <footer className="dashboard-footer">
-            <span>
-              Affiliate program · 10% commission on qualifying subscriptions
-            </span>
+            <span>Affiliate program · 20% commission after VAT exclusion</span>
             <Link href="/privacy">Privacy & terms</Link>
           </footer>
         </div>
